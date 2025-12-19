@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  alias     String   @unique
+  birthDate DateTime
+  createdAt DateTime @default(now())
+
+  posts Post[]
+  likes Like[]
+}
+
+model Post {
+  id        Int      @id @default(autoincrement())
+  message   String
+  createdAt DateTime @default(now())
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  images PostImage[]
+  likes  Like[]
+
+  @@index([userId])
+}
+
+model PostImage {
+  id Int @id @default(autoincrement())
+
+  // Nombre con el que se guarda en el servidor
+  nameServer String
+
+  // Nombre original del archivo
+  nameClient String
+
+  // Extensión del archivo (jpg, png, webp, etc)
+  ext String
+
+  // Tamaño en bytes
+  size Int
+
+  createdAt DateTime @default(now())
+
+  postId Int
+  post   Post @relation(fields: [postId], references: [id])
+
+  @@index([postId])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+
+  userId Int
+  postId Int
+
+  user User @relation(fields: [userId], references: [id])
+  post Post @relation(fields: [postId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
