@@ -2,10 +2,9 @@ import { prisma } from "./db.js";
 import bcrypt from "bcrypt";
 import { faker } from "@faker-js/faker";
 
-async function main() {
+export async function seed() {
   console.log("🌱 Iniciando seeding...");
 
-  // Limpiar la base de datos en orden correcto (por relaciones)
   console.log("🧹 Limpiando datos existentes...");
   await prisma.like.deleteMany();
   await prisma.postImage.deleteMany();
@@ -13,10 +12,10 @@ async function main() {
   await prisma.user.deleteMany();
 
   console.log("📝 Creando usuarios...");
+
   const users = [];
   const totalUsers = 15;
 
-  // Crear usuarios
   for (let i = 0; i < totalUsers; i++) {
     const firstName = faker.person.firstName();
     const lastName = faker.person.lastName();
@@ -62,6 +61,7 @@ async function main() {
   }
 
   console.log("\n📝 Creando posts...");
+
   const posts = [];
   const totalPosts = 50;
 
@@ -286,13 +286,3 @@ async function main() {
     `🔥 Post más popular: ID ${postWithMostLikes.id} por @${postWithMostLikes.user.alias} con ${postWithMostLikes._count.likes} likes`
   );
 }
-
-// Ejecutar el seeding
-main()
-  .catch((error) => {
-    console.error("❌ Error durante el seeding:", error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

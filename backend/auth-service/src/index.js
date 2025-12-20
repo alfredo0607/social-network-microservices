@@ -8,7 +8,13 @@ import morgan from "morgan";
 import fileUpload from "express-fileupload";
 import path from "path";
 import { fileURLToPath } from "url";
-import { prisma } from "./db.js";
+// import { prisma } from "./database/db.js";
+// import { seed } from "./database/seed.js";
+import { router } from "./router/index.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerOptions from "./docs/index.js";
+
+const PORT = process.env.PORT || 3001;
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -31,21 +37,32 @@ server.get("/heart_check", (req, res) => {
   return res.json({ message: "Servidor (AUTH) en linea." });
 });
 
-// server .use("/api/v1", router);
+server.use("/", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
 
-serverHttps.listen(process.env.PORT, () => {
-  console.log(
-    `Servidor Express escuchando en el puerto (AUTH) ${process.env.PORT}`
-  );
+server.use("/api/v1", router);
+
+serverHttps.listen(PORT, () => {
+  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
 });
 
-async function main() {
-  try {
-    const allUsers = await prisma.user.findMany();
-    console.log("All users:", JSON.stringify(allUsers, null, 2));
-  } catch (error) {
-    console.log(error);
-  }
-}
+// async function initializeApp() {
+//   try {
+//     const userCount = await prisma.user.count();
 
-main();
+//     if (userCount === 0) {
+//       console.log("🔍 Base de datos vacía, ejecutando seed...");
+//       await seed();
+//     }
+
+//     // Iniciar servidor
+//     serverHttps.listen(PORT, () => {
+//       console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+//       console.log(`📊 Usuarios en BD: ${userCount}`);
+//     });
+//   } catch (error) {
+//     console.error("❌ Error al inicializar la aplicación:", error);
+//     process.exit(1);
+//   }
+// }
+
+// initializeApp();
