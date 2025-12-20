@@ -8,6 +8,7 @@ import morgan from "morgan";
 import fileUpload from "express-fileupload";
 import path from "path";
 import { fileURLToPath } from "url";
+import { prisma } from "./db.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -37,3 +38,14 @@ serverHttps.listen(process.env.PORT, () => {
     `Servidor Express escuchando en el puerto (AUTH) ${process.env.PORT}`
   );
 });
+
+async function main() {
+  try {
+    const allUsers = await prisma.user.findMany();
+    console.log("All users:", JSON.stringify(allUsers, null, 2));
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+main();
