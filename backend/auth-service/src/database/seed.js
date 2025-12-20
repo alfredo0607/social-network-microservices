@@ -1,5 +1,5 @@
 import { prisma } from "./db.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { faker } from "@faker-js/faker";
 
 export async function seed() {

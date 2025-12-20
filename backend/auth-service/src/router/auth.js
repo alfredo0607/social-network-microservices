@@ -7,9 +7,10 @@ import {
   formatErrorValidator,
   formatResponse,
 } from "../helpers/errorFormatter.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { prisma } from "../database/db.js";
-import { checkToken, CreateTokenUser } from "../JWT/index.js";
+import { checkToken } from "../middlewares/index.js";
+import { CreateTokenUser } from "../helpers/CreateTokenUser.js";
 
 const routerAuth = ezpress.Router();
 
@@ -36,9 +37,8 @@ routerAuth.post(
   async (req, res) => {
     const resultErrors = validationResult(req).formatWith(errorFormatter);
     if (!resultErrors.isEmpty()) {
-      return res
-        .status(422)
-        .json(formatResponse({}, formatErrorValidator(resultErrors)));
+      const errorResponse = formatErrorValidator(resultErrors);
+      return res.status(422).json(formatResponse({}, errorResponse));
     }
 
     try {
@@ -89,7 +89,7 @@ routerAuth.post(
         )
       );
     } catch (error) {
-      console.error("Login error:", error); // Mejor log
+      console.error("Login error:", error);
       return res.status(500).json(formatErrorResponse(error));
     }
   }
@@ -120,14 +120,19 @@ routerAuth.get("/relogin", checkToken, async (req, res) => {
 
     const { password: _, ...userData } = userExist;
 
-    return res.status(200).json({
-      errores: "",
-      data: { message: "Token validado con exito", token, data: userData },
-    });
+    return res.status(200).json(
+      formatResponse(
+        {
+          message: "Token validado con éxito",
+          token,
+          data: userData,
+        },
+        ""
+      )
+    );
   } catch (error) {
-    console.log(error);
-    const errorFormated = formatErrorResponse(error);
-    return res.status(500).json(errorFormated);
+    console.error("Relogin error:", error);
+    return res.status(500).json(formatErrorResponse(error));
   }
 });
 

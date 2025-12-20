@@ -20,7 +20,7 @@ export const formatErrorResponse = (error) => {
     return formatResponse({}, errorMsg);
   } else {
     if (error.code) {
-      const errorMsg = `[MYSQL_ERROR_${error.code}]: ${error.sqlMessage}`;
+      const errorMsg = `[SQL_ERROR_${error.code}]: ${error.sqlMessage}`;
       return formatResponse({}, errorMsg);
     } else {
       const errorMsg = `[SERVER_ERROR_500]: Ocurrio un error inesperado en el servidor`;
