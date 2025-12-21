@@ -19,6 +19,13 @@ const validateLike = [
     .isInt({ min: 1 })
     .withMessage("El ID del post debe ser un número entero positivo")
     .toInt(),
+
+  body("userId")
+    .notEmpty()
+    .withMessage("El ID del usuario es requerido")
+    .isInt({ min: 1 })
+    .withMessage("El ID del usuario debe ser un número entero positivo")
+    .toInt(),
 ];
 
 // Agregar o quitar like a una publicación
@@ -34,8 +41,7 @@ routeLike.post(
     }
 
     try {
-      const { postId } = req.body;
-      const userId = req.user.id;
+      const { postId, userId } = req.body;
 
       const postExists = await prisma.post.findUnique({
         where: { id: postId },
@@ -124,6 +130,7 @@ routeLike.get(
       .isInt({ min: 1, max: 100 })
       .withMessage("El límite debe ser un número entre 1 y 100")
       .toInt(),
+    checkToken,
   ],
   async (req, res) => {
     const resultErrors = validationResult(req).formatWith(errorFormatter);

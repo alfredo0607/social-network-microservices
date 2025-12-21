@@ -228,7 +228,7 @@ expressUser.get(
       .withMessage("El término de búsqueda debe ser texto")
       .trim()
       .escape()
-      .isLength({ min: 2 })
+      .isLength({ min: 1 })
       .withMessage("El término de búsqueda debe tener al menos 2 caracteres"),
     query("limit")
       .optional()
