@@ -22,69 +22,6 @@ const validateUserExists = async (userId) => {
   return true;
 };
 
-// Obtener todas las publicaciones con sus relaciones
-routerPost.get("/get-all-posts", checkToken, async (req, res) => {
-  const resultErrors = validationResult(req).formatWith(errorFormatter);
-  if (!resultErrors.isEmpty()) {
-    const errorResponse = formatErrorValidator(resultErrors);
-    return res.status(422).json(formatResponse({}, errorResponse));
-  }
-
-  try {
-    // Obtener todas las publicaciones con sus relaciones
-    const posts = await prisma.post.findMany({
-      include: {
-        // Incluir información del usuario que creó el post
-        User: {
-          select: {
-            id: true,
-            email: true,
-            // Añade aquí otros campos del usuario que quieras mostrar
-          },
-        },
-        // Incluir los likes del post
-        Like: {
-          include: {
-            User: {
-              select: {
-                id: true,
-                email: true,
-                // Añade aquí otros campos del usuario que dio like
-              },
-            },
-          },
-        },
-        // Incluir las imágenes del post
-        PostImage: true,
-      },
-      orderBy: {
-        createdAt: "desc", // Ordenar por fecha de creación, más recientes primero
-      },
-    });
-
-    // Formatear la respuesta para incluir el conteo de likes
-    const postsWithLikeCount = posts.map((post) => ({
-      ...post,
-      likeCount: post.Like.length,
-      // Puedes añadir más campos formateados aquí si es necesario
-    }));
-
-    return res.status(200).json(
-      formatResponse(
-        {
-          posts: postsWithLikeCount,
-          totalPosts: posts.length,
-          message: "Posts obtenidos exitosamente",
-        },
-        ""
-      )
-    );
-  } catch (error) {
-    console.error("Error al obtener posts:", error);
-    return res.status(500).json(formatErrorResponse(error));
-  }
-});
-
 // Obtener posts con paginación
 routerPost.get(
   "/get-posts-paginated",
@@ -132,18 +69,15 @@ routerPost.get(
 
       const pageNumber = parseInt(page);
       const limitNumber = parseInt(limit);
+      const currentUserId = req.user.id;
 
-      // Construir objeto where dinámicamente
       const whereClause = {};
       if (userId) {
         whereClause.userId = parseInt(userId);
       }
 
-      // Construir objeto orderBy dinámicamente
       let orderByClause = {};
       if (sortBy === "likeCount") {
-        // Para ordenar por conteo de likes, necesitaríamos una consulta más compleja
-        // Por ahora mantenemos el orden por createdAt
         orderByClause = { createdAt: order };
       } else {
         orderByClause = { [sortBy]: order };
@@ -151,48 +85,60 @@ routerPost.get(
 
       const skip = (pageNumber - 1) * limitNumber;
 
-      const [posts, totalPosts] = await Promise.all([
-        prisma.post.findMany({
-          where: whereClause,
-          include: {
-            User: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
-              },
+      const posts = await prisma.post.findMany({
+        where: whereClause,
+        include: {
+          User: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
             },
-            Like: {
-              include: {
-                User: {
-                  select: {
-                    id: true,
-                    email: true,
-                    name: true,
-                  },
-                },
-              },
-            },
-            PostImage: true,
           },
-          orderBy: orderByClause,
-          skip: skip,
-          take: limitNumber,
-        }),
-        prisma.post.count({
-          where: whereClause,
-        }),
-      ]);
+          PostImage: true,
+          Like: {
+            where: {
+              userId: currentUserId,
+            },
+            select: {
+              id: true,
+              userId: true,
+              createdAt: true,
+            },
+          },
+        },
+        orderBy: orderByClause,
+        skip: skip,
+        take: limitNumber,
+      });
 
-      const postsWithLikeCount = posts.map((post) => ({
-        ...post,
-        likeCount: post.Like.length,
-      }));
+      const totalPosts = await prisma.post.count({
+        where: whereClause,
+      });
+
+      const postsWithLikeInfo = await Promise.all(
+        posts.map(async (post) => {
+          const totalLikes = await prisma.like.count({
+            where: {
+              postId: post.id,
+            },
+          });
+
+          const userLiked = post.Like.length > 0;
+
+          return {
+            ...post,
+            likeCount: totalLikes,
+            userHasLiked: userLiked,
+            userLike: userLiked ? post.Like[0] : null,
+          };
+        })
+      );
 
       return res.status(200).json(
         formatResponse(
           {
-            posts: postsWithLikeCount,
+            posts: postsWithLikeInfo,
             pagination: {
               totalPosts,
               totalPages: Math.ceil(totalPosts / limitNumber),
@@ -329,82 +275,7 @@ routerPost.get(
   }
 );
 
-// Obtener un post específico por ID
-routerPost.get(
-  "/get-post/:postId",
-  [
-    param("postId")
-      .notEmpty()
-      .withMessage("El ID del post es requerido")
-      .isInt({ min: 1 })
-      .withMessage("El ID del post debe ser un número válido")
-      .toInt(),
-    checkToken,
-  ],
-  async (req, res) => {
-    const resultErrors = validationResult(req).formatWith(errorFormatter);
-    if (!resultErrors.isEmpty()) {
-      const errorResponse = formatErrorValidator(resultErrors);
-      return res.status(422).json(formatResponse({}, errorResponse));
-    }
-
-    try {
-      const { postId } = req.params;
-
-      const post = await prisma.post.findUnique({
-        where: {
-          id: parseInt(postId),
-        },
-        include: {
-          User: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-            },
-          },
-          Like: {
-            include: {
-              User: {
-                select: {
-                  id: true,
-                  email: true,
-                  name: true,
-                },
-              },
-            },
-          },
-          PostImage: true,
-        },
-      });
-
-      if (!post) {
-        return res
-          .status(404)
-          .json(formatResponse({}, "El post no fue encontrado"));
-      }
-
-      const postWithLikeCount = {
-        ...post,
-        likeCount: post.Like.length,
-      };
-
-      return res.status(200).json(
-        formatResponse(
-          {
-            post: postWithLikeCount,
-            message: "Post obtenido exitosamente",
-          },
-          ""
-        )
-      );
-    } catch (error) {
-      console.error("Error al obtener el post:", error);
-      return res.status(500).json(formatErrorResponse(error));
-    }
-  }
-);
-
+// Create post
 routerPost.post(
   "/create-post",
   [

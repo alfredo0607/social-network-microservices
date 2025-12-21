@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    Int
+  postId    Int
+  Post      Post     @relation(fields: [postId], references: [id])
+  User      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, postId])
+  @@index([postId])
+}
+
+model Post {
+  id        Int         @id @default(autoincrement())
+  message   String
+  createdAt DateTime    @default(now())
+  userId    Int
+  Like      Like[]
+  User      User        @relation(fields: [userId], references: [id])
+  PostImage PostImage[]
+
+  @@index([userId])
+}
+
+model PostImage {
+  id         Int      @id @default(autoincrement())
+  nameServer String
+  nameClient String
+  ext        String
+  size       Int
+  createdAt  DateTime @default(now())
+  postId     Int
+  Post       Post     @relation(fields: [postId], references: [id])
+
+  @@index([postId])
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  alias     String   @unique
+  birthDate DateTime
+  createdAt DateTime @default(now())
+  Like      Like[]
+  Post      Post[]
+}

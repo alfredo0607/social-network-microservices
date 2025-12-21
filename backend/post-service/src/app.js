@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 app.get("/heart_check", (req, res) => {
-  return res.json({ message: "Servidor (AUTH) en línea." });
+  return res.json({ message: "Servidor (POST) en línea." });
 });
 
 app.use("/api/v1", router);

@@ -7,7 +7,6 @@ import app from "./app.js";
 
 const PORT = process.env.PORT || 3001;
 
-// 🚀 Crear servidor HTTP
 const server = http.createServer(app);
 
 server.listen(PORT, () => {
