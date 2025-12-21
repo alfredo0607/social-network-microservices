@@ -8,6 +8,7 @@ import {
 } from "../helpers/errorFormatter.js";
 import { prisma } from "../database/db.js";
 import { checkToken } from "../middlewares/index.js";
+import moment from "moment";
 
 const routerPost = express.Router();
 
@@ -158,6 +159,7 @@ routerPost.get(
               select: {
                 id: true,
                 email: true,
+                name: true,
               },
             },
             Like: {
@@ -166,6 +168,7 @@ routerPost.get(
                   select: {
                     id: true,
                     email: true,
+                    name: true,
                   },
                 },
               },
@@ -265,6 +268,7 @@ routerPost.get(
               select: {
                 id: true,
                 email: true,
+                name: true,
               },
             },
             Like: {
@@ -273,6 +277,7 @@ routerPost.get(
                   select: {
                     id: true,
                     email: true,
+                    name: true,
                   },
                 },
               },
@@ -355,6 +360,7 @@ routerPost.get(
             select: {
               id: true,
               email: true,
+              name: true,
             },
           },
           Like: {
@@ -363,6 +369,7 @@ routerPost.get(
                 select: {
                   id: true,
                   email: true,
+                  name: true,
                 },
               },
             },
@@ -418,7 +425,7 @@ routerPost.post(
       .custom(async (userId) => {
         return await validateUserExists(userId);
       }),
-    // Validación opcional para imágenes si las envías en el mismo request
+
     body("images")
       .optional()
       .isArray()
@@ -451,9 +458,7 @@ routerPost.post(
     try {
       const { message, userId, images = [] } = req.body;
 
-      // Crear la publicación con transacción para asegurar consistencia
       const newPost = await prisma.$transaction(async (prisma) => {
-        // 1. Crear la publicación principal
         const post = await prisma.post.create({
           data: {
             message,
@@ -461,7 +466,6 @@ routerPost.post(
           },
         });
 
-        // 2. Si hay imágenes, crearlas y asociarlas al post
         if (images && images.length > 0) {
           const postImages = images.map((image) => ({
             nameServer: image.nameServer,
@@ -476,7 +480,6 @@ routerPost.post(
           });
         }
 
-        // 3. Obtener la publicación completa con relaciones
         const completePost = await prisma.post.findUnique({
           where: { id: post.id },
           include: {
@@ -484,6 +487,7 @@ routerPost.post(
               select: {
                 id: true,
                 email: true,
+                name: true,
               },
             },
             Like: {
@@ -503,9 +507,11 @@ routerPost.post(
         return completePost;
       });
 
-      // Formatear respuesta
       const postResponse = {
         ...newPost,
+        createdAt: moment(newPost.createdAt)
+          .locale("es")
+          .format("DD[,] MMM [del] YYYY"),
         likeCount: newPost.Like.length,
       };
 
@@ -521,7 +527,6 @@ routerPost.post(
     } catch (error) {
       console.error("Error al crear publicación:", error);
 
-      // Manejo específico de errores de base de datos
       if (error.code === "P2002") {
         return res
           .status(409)

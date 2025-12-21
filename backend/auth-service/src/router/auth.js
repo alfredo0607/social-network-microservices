@@ -11,6 +11,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../database/db.js";
 import { checkToken } from "../middlewares/index.js";
 import { CreateTokenUser } from "../helpers/CreateTokenUser.js";
+import moment from "moment";
 
 const routerAuth = ezpress.Router();
 
@@ -118,6 +119,10 @@ routerAuth.get("/relogin", checkToken, async (req, res) => {
 
     const token = CreateTokenUser(userExist);
 
+    const formatterDate = moment(userExist.createdAt)
+      .locale("es")
+      .format("DD[,] MMM [del] YYYY");
+
     const { password: _, ...userData } = userExist;
 
     return res.status(200).json(
@@ -125,7 +130,7 @@ routerAuth.get("/relogin", checkToken, async (req, res) => {
         {
           message: "Token validado con éxito",
           token,
-          data: userData,
+          data: { ...userData, createdAt: formatterDate },
         },
         ""
       )
