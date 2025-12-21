@@ -11,7 +11,7 @@ const Page = forwardRef<HTMLDivElement, PageProps>(
     return (
       <div ref={ref} {...rest}>
         <Helmet>
-          <title>{title} | InstagramReact</title>
+          <title>{title} | Instamood</title>
         </Helmet>
         {children}
       </div>

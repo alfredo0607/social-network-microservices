@@ -36,8 +36,6 @@ export default function DashboardLayout() {
                 <Outlet />
               </Grid>
             </Grid>
-
-            {/* <MainGrid /> */}
           </Stack>
         </Box>
       </Box>

@@ -2,16 +2,16 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:3001/api/v1",
+  baseURL: "http://localhost:3004/api/v1",
 });
 
-export const setRequestToken = (token: string) =>
+export const setRequestTokenUser = (token: string) =>
   (axiosInstance.defaults.headers.common["Authorization"] = "Bearer " + token);
 
-export const removeRequestToken = () =>
+export const removeRequestTokenUser = () =>
   (axiosInstance.defaults.headers.common["Authorization"] = null);
 
-export const fetchRequest = (
+export const fetchRequestUser = (
   endpoint = "",
   method = "GET",
   data = {},

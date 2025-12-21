@@ -2,167 +2,101 @@ const swaggerOptions = {
   openapi: "3.0.3",
 
   info: {
-    title: "Posts Service - Social Network Microservices",
-    description:
-      "API para la gestión de publicaciones (posts) en la plataforma de microservicios de red social. Permite crear, obtener, actualizar y eliminar publicaciones, así como manejar likes e imágenes asociadas.",
+    title: "User Service - Social Network Microservices",
+    description: "API para gestión de usuarios en la red social.",
     version: "1.0.0",
     contact: {
       name: "Alfredo Jose Dominguez Hernandez",
       email: "alfredojosedominguezhernandez@gmail.com",
       url: "https://github.com/alfredo0607/social-network-microservices",
     },
-    license: {
-      name: "MIT",
-      url: "https://opensource.org/licenses/MIT",
-    },
   },
 
   servers: [
     {
-      url: "http://localhost:3002", // Asumiendo que el servicio de posts corre en puerto diferente
-      description: "Servidor local de posts",
-    },
-    {
-      url: "https://api.ejemplo.com/posts",
-      description: "Servidor de producción",
+      url: "http://localhost:3001",
+      description: "Servidor local",
     },
   ],
 
   tags: [
     {
-      name: "Publicaciones",
-      description: "Endpoints para gestión de publicaciones (posts)",
-    },
-    {
-      name: "Likes",
-      description: "Endpoints para gestión de likes en publicaciones",
-    },
-    {
-      name: "Imágenes",
-      description: "Endpoints para gestión de imágenes en publicaciones",
+      name: "Usuarios",
+      description: "Endpoints para gestión de usuarios",
     },
   ],
 
   paths: {
-    // ==================== RUTAS DE PUBLICACIONES ====================
-
-    "/api/posts/get-all-posts": {
+    "/api/v1/users/get-all-users": {
       get: {
-        tags: ["Publicaciones"],
-        summary: "Obtener todas las publicaciones",
+        tags: ["Usuarios"],
+        summary: "Obtener todos los usuarios",
         description:
-          "Retorna todas las publicaciones del sistema con sus relaciones (usuario, likes, imágenes)",
-        operationId: "getAllPosts",
-
-        responses: {
-          200: {
-            description: "Lista de publicaciones obtenida exitosamente",
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/PostsListResponse",
-                },
-              },
-            },
+          "Retorna la lista completa de usuarios con opciones de búsqueda y ordenamiento",
+        security: [
+          {
+            bearerAuth: [],
           },
-          500: {
-            description: "Error interno del servidor",
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/ErrorResponse",
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-
-    "/api/posts/get-posts-paginated": {
-      get: {
-        tags: ["Publicaciones"],
-        summary: "Obtener publicaciones paginadas",
-        description:
-          "Retorna publicaciones con paginación, filtros y ordenamiento",
-        operationId: "getPostsPaginated",
-
+        ],
         parameters: [
           {
-            name: "page",
+            name: "search",
             in: "query",
-            description: "Número de página",
             required: false,
+            description: "Término para buscar en nombre, alias o email",
             schema: {
-              type: "integer",
-              minimum: 1,
-              default: 1,
-              example: 1,
-            },
-          },
-          {
-            name: "limit",
-            in: "query",
-            description: "Cantidad de elementos por página",
-            required: false,
-            schema: {
-              type: "integer",
-              minimum: 1,
-              maximum: 100,
-              default: 10,
-              example: 10,
-            },
-          },
-          {
-            name: "userId",
-            in: "query",
-            description: "Filtrar por ID de usuario",
-            required: false,
-            schema: {
-              type: "integer",
-              minimum: 1,
-              example: 5,
+              type: "string",
+              example: "juan",
             },
           },
           {
             name: "sortBy",
             in: "query",
-            description: "Campo para ordenar los resultados",
             required: false,
+            description: "Campo por el cual ordenar los usuarios",
             schema: {
               type: "string",
-              enum: ["createdAt", "id"],
-              default: "createdAt",
-              example: "createdAt",
+              enum: ["name", "alias", "email", "createdAt", "birthDate"],
+              default: "name",
+              example: "name",
             },
           },
           {
             name: "order",
             in: "query",
-            description: "Dirección del ordenamiento",
             required: false,
+            description: "Orden de los resultados",
             schema: {
               type: "string",
               enum: ["asc", "desc"],
-              default: "desc",
-              example: "desc",
+              default: "asc",
+              example: "asc",
             },
           },
         ],
-
         responses: {
           200: {
-            description: "Publicaciones paginadas obtenidas exitosamente",
+            description: "Usuarios obtenidos exitosamente",
             content: {
               "application/json": {
                 schema: {
-                  $ref: "#/components/schemas/PaginatedPostsResponse",
+                  $ref: "#/components/schemas/AllUsersResponse",
+                },
+              },
+            },
+          },
+          401: {
+            description: "Token inválido o no proporcionado",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
                 },
               },
             },
           },
           422: {
-            description: "Parámetros de consulta inválidos",
+            description: "Error de validación en parámetros",
             content: {
               "application/json": {
                 schema: {
@@ -185,59 +119,46 @@ const swaggerOptions = {
       },
     },
 
-    "/api/posts/get-posts-by-user/{userId}": {
+    "/api/v1/users/get-user/{userId}": {
       get: {
-        tags: ["Publicaciones"],
-        summary: "Obtener publicaciones por usuario",
-        description: "Retorna todas las publicaciones de un usuario específico",
-        operationId: "getPostsByUser",
-
+        tags: ["Usuarios"],
+        summary: "Obtener un usuario específico",
+        description: "Retorna la información detallada de un usuario por su ID",
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
         parameters: [
           {
             name: "userId",
             in: "path",
-            description: "ID del usuario",
             required: true,
+            description: "ID del usuario a obtener",
             schema: {
               type: "integer",
               minimum: 1,
-              example: 1,
-            },
-          },
-          {
-            name: "page",
-            in: "query",
-            description: "Número de página",
-            required: false,
-            schema: {
-              type: "integer",
-              minimum: 1,
-              default: 1,
-              example: 1,
-            },
-          },
-          {
-            name: "limit",
-            in: "query",
-            description: "Cantidad de elementos por página",
-            required: false,
-            schema: {
-              type: "integer",
-              minimum: 1,
-              maximum: 50,
-              default: 10,
-              example: 10,
+              example: 123,
             },
           },
         ],
-
         responses: {
           200: {
-            description: "Publicaciones del usuario obtenidas exitosamente",
+            description: "Usuario obtenido exitosamente",
             content: {
               "application/json": {
                 schema: {
-                  $ref: "#/components/schemas/UserPostsResponse",
+                  $ref: "#/components/schemas/SingleUserResponse",
+                },
+              },
+            },
+          },
+          401: {
+            description: "Token inválido o no proporcionado",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
                 },
               },
             },
@@ -253,7 +174,7 @@ const swaggerOptions = {
             },
           },
           422: {
-            description: "Parámetros inválidos",
+            description: "Error de validación en parámetros",
             content: {
               "application/json": {
                 schema: {
@@ -276,41 +197,56 @@ const swaggerOptions = {
       },
     },
 
-    "/api/posts/get-post/{postId}": {
+    "/api/v1/users/search-users": {
       get: {
-        tags: ["Publicaciones"],
-        summary: "Obtener publicación específica",
+        tags: ["Usuarios"],
+        summary: "Buscar usuarios",
         description:
-          "Retorna una publicación específica por su ID con todas sus relaciones",
-        operationId: "getPostById",
-
+          "Busca usuarios por nombre, alias o email con resultados limitados",
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
         parameters: [
           {
-            name: "postId",
-            in: "path",
-            description: "ID de la publicación",
+            name: "q",
+            in: "query",
             required: true,
+            description: "Término de búsqueda (mínimo 2 caracteres)",
+            schema: {
+              type: "string",
+              minLength: 2,
+              example: "juan",
+            },
+          },
+          {
+            name: "limit",
+            in: "query",
+            required: false,
+            description: "Límite de resultados (máximo 50)",
             schema: {
               type: "integer",
               minimum: 1,
-              example: 123,
+              maximum: 50,
+              default: 20,
+              example: 20,
             },
           },
         ],
-
         responses: {
           200: {
-            description: "Publicación obtenida exitosamente",
+            description: "Búsqueda completada exitosamente",
             content: {
               "application/json": {
                 schema: {
-                  $ref: "#/components/schemas/SinglePostResponse",
+                  $ref: "#/components/schemas/SearchUsersResponse",
                 },
               },
             },
           },
-          404: {
-            description: "Publicación no encontrada",
+          401: {
+            description: "Token inválido o no proporcionado",
             content: {
               "application/json": {
                 schema: {
@@ -320,7 +256,7 @@ const swaggerOptions = {
             },
           },
           422: {
-            description: "Parámetro inválido",
+            description: "Error de validación en parámetros",
             content: {
               "application/json": {
                 schema: {
@@ -338,134 +274,6 @@ const swaggerOptions = {
                 },
               },
             },
-          },
-        },
-      },
-    },
-
-    // ==================== RUTAS DE LIKES (ejemplo de expansión futura) ====================
-
-    "/api/posts/like/{postId}": {
-      post: {
-        tags: ["Likes"],
-        summary: "Dar like a una publicación",
-        description:
-          "Registra un like del usuario autenticado a una publicación",
-        operationId: "likePost",
-
-        security: [
-          {
-            bearerAuth: [],
-          },
-        ],
-
-        parameters: [
-          {
-            name: "postId",
-            in: "path",
-            description: "ID de la publicación a la que se dará like",
-            required: true,
-            schema: {
-              type: "integer",
-              minimum: 1,
-            },
-          },
-        ],
-
-        responses: {
-          200: {
-            description: "Like registrado exitosamente",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    message: {
-                      type: "string",
-                      example: "Like registrado exitosamente",
-                    },
-                  },
-                },
-              },
-            },
-          },
-          400: {
-            description: "El usuario ya dio like a esta publicación",
-          },
-          404: {
-            description: "Publicación no encontrada",
-          },
-          401: {
-            description: "Usuario no autenticado",
-          },
-          500: {
-            description: "Error interno del servidor",
-          },
-        },
-      },
-    },
-
-    // ==================== RUTAS DE IMÁGENES (ejemplo de expansión futura) ====================
-
-    "/api/posts/{postId}/images": {
-      post: {
-        tags: ["Imágenes"],
-        summary: "Subir imagen a publicación",
-        description: "Sube una o más imágenes a una publicación existente",
-        operationId: "uploadPostImages",
-
-        security: [
-          {
-            bearerAuth: [],
-          },
-        ],
-
-        parameters: [
-          {
-            name: "postId",
-            in: "path",
-            description: "ID de la publicación",
-            required: true,
-            schema: {
-              type: "integer",
-              minimum: 1,
-            },
-          },
-        ],
-
-        requestBody: {
-          required: true,
-          content: {
-            "multipart/form-data": {
-              schema: {
-                type: "object",
-                properties: {
-                  images: {
-                    type: "array",
-                    items: {
-                      type: "string",
-                      format: "binary",
-                    },
-                    description: "Archivos de imagen a subir",
-                  },
-                },
-              },
-            },
-          },
-        },
-
-        responses: {
-          200: {
-            description: "Imágenes subidas exitosamente",
-          },
-          404: {
-            description: "Publicación no encontrada",
-          },
-          401: {
-            description: "Usuario no autenticado o no autorizado",
-          },
-          500: {
-            description: "Error interno del servidor",
           },
         },
       },
@@ -478,352 +286,241 @@ const swaggerOptions = {
         type: "http",
         scheme: "bearer",
         bearerFormat: "JWT",
-        description: "JWT token obtenido del servicio de autenticación",
       },
     },
 
     schemas: {
-      // ==================== MODELOS BASE ====================
-
       User: {
         type: "object",
         properties: {
           id: {
             type: "integer",
-            example: 1,
-            description: "ID único del usuario",
+            example: 123,
           },
           email: {
             type: "string",
             format: "email",
             example: "usuario@ejemplo.com",
-            description: "Email del usuario",
           },
-          // Puedes agregar más campos del usuario según tu modelo
-        },
-      },
-
-      Like: {
-        type: "object",
-        properties: {
-          id: {
-            type: "integer",
-            example: 1,
-            description: "ID único del like",
+          name: {
+            type: "string",
+            example: "Juan Pérez",
           },
-          userId: {
-            type: "integer",
-            example: 1,
-            description: "ID del usuario que dio like",
+          alias: {
+            type: "string",
+            example: "juanito",
           },
-          postId: {
-            type: "integer",
-            example: 123,
-            description: "ID de la publicación",
+          birthDate: {
+            type: "string",
+            description: "Fecha de nacimiento formateada en español",
+            example: "15, Mar del 1990",
           },
           createdAt: {
             type: "string",
-            format: "date-time",
-            example: "2024-01-01T12:00:00.000Z",
-            description: "Fecha y hora del like",
+            description: "Fecha de creación formateada en español",
+            example: "01, Ene del 2024",
           },
-          User: {
-            $ref: "#/components/schemas/User",
-          },
-        },
-      },
-
-      PostImage: {
-        type: "object",
-        properties: {
-          id: {
+          age: {
             type: "integer",
-            example: 1,
-            description: "ID único de la imagen",
+            nullable: true,
+            description: "Edad calculada a partir de la fecha de nacimiento",
+            example: 34,
           },
-          nameServer: {
-            type: "string",
-            example: "image_12345.jpg",
-            description: "Nombre del archivo en el servidor",
-          },
-          nameClient: {
-            type: "string",
-            example: "mi_foto.jpg",
-            description: "Nombre original del archivo del cliente",
-          },
-          ext: {
-            type: "string",
-            example: "jpg",
-            description: "Extensión del archivo",
-          },
-          size: {
+          postCount: {
             type: "integer",
-            example: 1024576,
-            description: "Tamaño del archivo en bytes",
+            description: "Número total de publicaciones del usuario",
+            example: 25,
           },
-          createdAt: {
-            type: "string",
-            format: "date-time",
-            example: "2024-01-01T12:00:00.000Z",
-            description: "Fecha y hora de subida",
-          },
-        },
-      },
-
-      Post: {
-        type: "object",
-        required: ["message", "userId"],
-        properties: {
-          id: {
+          likeCount: {
             type: "integer",
-            example: 123,
-            description: "ID único de la publicación",
-          },
-          message: {
-            type: "string",
-            example: "¡Hola mundo! Esta es mi primera publicación.",
-            description: "Contenido de la publicación",
-          },
-          userId: {
-            type: "integer",
-            example: 1,
-            description: "ID del usuario creador",
-          },
-          createdAt: {
-            type: "string",
-            format: "date-time",
-            example: "2024-01-01T12:00:00.000Z",
-            description: "Fecha y hora de creación",
-          },
-          User: {
-            $ref: "#/components/schemas/User",
-            description: "Información del usuario creador",
-          },
-          Like: {
-            type: "array",
-            items: {
-              $ref: "#/components/schemas/Like",
-            },
-            description: "Lista de likes de la publicación",
-          },
-          PostImage: {
-            type: "array",
-            items: {
-              $ref: "#/components/schemas/PostImage",
-            },
-            description: "Lista de imágenes de la publicación",
+            description: "Número total de likes dados por el usuario",
+            example: 150,
           },
         },
       },
 
-      // ==================== SCHEMAS DE RESPUESTA ====================
-
-      PostWithLikeCount: {
-        allOf: [
-          {
-            $ref: "#/components/schemas/Post",
-          },
-          {
-            type: "object",
-            properties: {
-              likeCount: {
-                type: "integer",
-                example: 42,
-                description: "Número total de likes",
-              },
-            },
-          },
-        ],
-      },
-
-      PostsListResponse: {
-        type: "object",
-        properties: {
-          errores: {
-            type: "string",
-            example: "",
-            description: "Cadena vacía si no hay errores",
-          },
-          data: {
-            type: "object",
-            properties: {
-              posts: {
-                type: "array",
-                items: {
-                  $ref: "#/components/schemas/PostWithLikeCount",
-                },
-              },
-              totalPosts: {
-                type: "integer",
-                example: 150,
-                description: "Número total de publicaciones",
-              },
-              message: {
-                type: "string",
-                example: "Posts obtenidos exitosamente",
-              },
-            },
-          },
-        },
-      },
-
-      PaginatedPostsResponse: {
-        type: "object",
-        properties: {
-          errores: {
-            type: "string",
-            example: "",
-          },
-          data: {
-            type: "object",
-            properties: {
-              posts: {
-                type: "array",
-                items: {
-                  $ref: "#/components/schemas/PostWithLikeCount",
-                },
-              },
-              pagination: {
-                type: "object",
-                properties: {
-                  totalPosts: {
-                    type: "integer",
-                    example: 150,
-                  },
-                  totalPages: {
-                    type: "integer",
-                    example: 15,
-                  },
-                  currentPage: {
-                    type: "integer",
-                    example: 1,
-                  },
-                  hasNextPage: {
-                    type: "boolean",
-                    example: true,
-                  },
-                  hasPreviousPage: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  limit: {
-                    type: "integer",
-                    example: 10,
-                  },
-                },
-              },
-              filters: {
-                type: "object",
-                properties: {
-                  userId: {
-                    type: "integer",
-                    nullable: true,
-                    example: 5,
-                  },
-                  sortBy: {
-                    type: "string",
-                    example: "createdAt",
-                  },
-                  order: {
-                    type: "string",
-                    example: "desc",
-                  },
-                },
-              },
-              message: {
-                type: "string",
-                example: "Posts obtenidos exitosamente",
-              },
-            },
-          },
-        },
-      },
-
-      UserPostsResponse: {
-        type: "object",
-        properties: {
-          errores: {
-            type: "string",
-            example: "",
-          },
-          data: {
-            type: "object",
-            properties: {
-              posts: {
-                type: "array",
-                items: {
-                  $ref: "#/components/schemas/PostWithLikeCount",
-                },
-              },
-              pagination: {
-                $ref: "#/components/schemas/PaginationInfo",
-              },
-              user: {
-                type: "object",
-                properties: {
-                  id: {
-                    type: "integer",
-                    example: 1,
-                  },
-                },
-              },
-              message: {
-                type: "string",
-                example: "Posts del usuario obtenidos exitosamente",
-              },
-            },
-          },
-        },
-      },
-
-      SinglePostResponse: {
-        type: "object",
-        properties: {
-          errores: {
-            type: "string",
-            example: "",
-          },
-          data: {
-            type: "object",
-            properties: {
-              post: {
-                $ref: "#/components/schemas/PostWithLikeCount",
-              },
-              message: {
-                type: "string",
-                example: "Post obtenido exitosamente",
-              },
-            },
-          },
-        },
-      },
-
-      PaginationInfo: {
+      UserStats: {
         type: "object",
         properties: {
           totalPosts: {
             type: "integer",
             example: 25,
           },
-          totalPages: {
+          totalLikes: {
             type: "integer",
-            example: 3,
+            example: 150,
           },
-          currentPage: {
+        },
+      },
+
+      SearchResult: {
+        type: "object",
+        properties: {
+          id: {
             type: "integer",
-            example: 1,
+            example: 123,
           },
-          hasNextPage: {
-            type: "boolean",
-            example: true,
+          name: {
+            type: "string",
+            example: "Juan Pérez",
           },
-          hasPreviousPage: {
-            type: "boolean",
-            example: false,
+          alias: {
+            type: "string",
+            example: "juanito",
           },
-          limit: {
+          email: {
+            type: "string",
+            format: "email",
+            example: "usuario@ejemplo.com",
+          },
+          memberSince: {
+            type: "string",
+            format: "date-time",
+            example: "2024-01-01T00:00:00.000Z",
+          },
+          postCount: {
             type: "integer",
-            example: 10,
+            example: 25,
+          },
+        },
+      },
+
+      AllUsersResponse: {
+        type: "object",
+        properties: {
+          errores: {
+            type: "string",
+            example: "",
+          },
+          data: {
+            type: "object",
+            properties: {
+              users: {
+                type: "array",
+                items: {
+                  $ref: "#/components/schemas/User",
+                },
+              },
+              totalUsers: {
+                type: "integer",
+                description: "Número total de usuarios retornados",
+                example: 50,
+              },
+              filters: {
+                type: "object",
+                properties: {
+                  search: {
+                    oneOf: [
+                      { type: "string", example: "juan" },
+                      { type: "null" },
+                    ],
+                  },
+                  sortBy: {
+                    type: "string",
+                    example: "name",
+                  },
+                  order: {
+                    type: "string",
+                    example: "asc",
+                  },
+                },
+              },
+              message: {
+                type: "string",
+                example: "Usuarios obtenidos exitosamente",
+              },
+            },
+          },
+        },
+      },
+
+      SingleUserResponse: {
+        type: "object",
+        properties: {
+          errores: {
+            type: "string",
+            example: "",
+          },
+          data: {
+            type: "object",
+            properties: {
+              user: {
+                type: "object",
+                properties: {
+                  id: {
+                    type: "integer",
+                    example: 123,
+                  },
+                  email: {
+                    type: "string",
+                    example: "usuario@ejemplo.com",
+                  },
+                  name: {
+                    type: "string",
+                    example: "Juan Pérez",
+                  },
+                  alias: {
+                    type: "string",
+                    example: "juanito",
+                  },
+                  birthDate: {
+                    type: "string",
+                    example: "15, Mar del 1990",
+                  },
+                  createdAt: {
+                    type: "string",
+                    example: "01, Ene del 2024",
+                  },
+                  age: {
+                    type: "integer",
+                    nullable: true,
+                    example: 34,
+                  },
+                  stats: {
+                    $ref: "#/components/schemas/UserStats",
+                  },
+                },
+              },
+              message: {
+                type: "string",
+                example: "Usuario obtenido exitosamente",
+              },
+            },
+          },
+        },
+      },
+
+      SearchUsersResponse: {
+        type: "object",
+        properties: {
+          errores: {
+            type: "string",
+            example: "",
+          },
+          data: {
+            type: "object",
+            properties: {
+              results: {
+                type: "array",
+                items: {
+                  $ref: "#/components/schemas/SearchResult",
+                },
+              },
+              totalResults: {
+                type: "integer",
+                description: "Número total de resultados encontrados",
+                example: 10,
+              },
+              searchQuery: {
+                type: "string",
+                description: "Término de búsqueda utilizado",
+                example: "juan",
+              },
+              message: {
+                type: "string",
+                example: "Búsqueda de usuarios completada",
+              },
+            },
           },
         },
       },
@@ -834,22 +531,6 @@ const swaggerOptions = {
           errores: {
             type: "string",
             example: "Credenciales inválidas",
-            description: "Mensaje de error descriptivo",
-          },
-          data: {
-            type: "object",
-            example: {},
-            description: "Objeto vacío o datos adicionales del error",
-          },
-        },
-      },
-
-      ValidationError: {
-        type: "object",
-        properties: {
-          errores: {
-            type: "string",
-            example: "El parámetro 'page' debe ser un número entero mayor a 0",
           },
           data: {
             type: "object",
@@ -858,86 +539,6 @@ const swaggerOptions = {
         },
       },
     },
-
-    // ==================== PARÁMETROS REUTILIZABLES ====================
-
-    parameters: {
-      pageParam: {
-        name: "page",
-        in: "query",
-        description: "Número de página",
-        required: false,
-        schema: {
-          type: "integer",
-          minimum: 1,
-          default: 1,
-        },
-      },
-      limitParam: {
-        name: "limit",
-        in: "query",
-        description: "Cantidad de elementos por página",
-        required: false,
-        schema: {
-          type: "integer",
-          minimum: 1,
-          maximum: 100,
-          default: 10,
-        },
-      },
-    },
-
-    // ==================== RESPONSES REUTILIZABLES ====================
-
-    responses: {
-      UnauthorizedError: {
-        description: "Token inválido o expirado",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ErrorResponse",
-            },
-          },
-        },
-      },
-      NotFoundError: {
-        description: "Recurso no encontrado",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ErrorResponse",
-            },
-          },
-        },
-      },
-      ValidationError: {
-        description: "Error de validación de parámetros",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ValidationError",
-            },
-          },
-        },
-      },
-      ServerError: {
-        description: "Error interno del servidor",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ErrorResponse",
-            },
-          },
-        },
-      },
-    },
-  },
-
-  // ==================== CONFIGURACIONES ADICIONALES ====================
-
-  externalDocs: {
-    description: "Documentación completa del proyecto",
-    url: "https://github.com/alfredo0607/social-network-microservices",
   },
 };
 

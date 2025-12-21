@@ -6,11 +6,6 @@ import {
   Divider,
   Button,
   Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  CardHeader,
-  IconButton,
 } from "@mui/material";
 import {
   MoreHorizontal,
@@ -18,47 +13,50 @@ import {
   MessageCircle,
   Repeat2,
   Send,
-  X,
 } from "lucide-react";
 import { useState } from "react";
-
-interface User {
-  id: number;
-  email: string;
-}
-
-interface Like {
-  id: number;
-  createdAt: string;
-  userId: number;
-  postId: number;
-  User: User;
-}
+import ListUserLikePostDialog from "./Dialog/ListUserLikePostDialog";
+import { useLike } from "../../../context/likeContext";
+import { useAuth } from "../../../context/authContext";
+import { useAlert } from "../../../context/alertsContext";
+import { usePost } from "../../../context/postContext";
 
 interface PostCardProps {
   author: string;
   subtitle: string;
-  time: string;
   content: string;
-  image?: string; // opcional
+  image?: string;
   likes?: number;
   comments?: number;
   shares?: number;
-  likesList: Like[];
+  id: number;
+  userHasLiked: boolean;
+  authorID: number;
 }
 
 export default function CardPost({
   author,
   subtitle,
-  time,
   content,
   image,
   likes = 0,
   comments = 0,
   shares = 0,
-  likesList,
+  id,
+  userHasLiked,
+  authorID,
 }: PostCardProps) {
-  const [dialogLike, setDialogLike] = useState(false);
+  const [{ status, postID }, setDialogLike] = useState({
+    status: false,
+    postID: 0,
+  });
+
+  const { user } = useAuth();
+  const { showAlert } = useAlert();
+  const { CreateOrDeleteLikePost } = useLike();
+  const { updateHasLikeUser, updateHasLikeUserMtpost } = usePost();
+
+  const [loadingLike, setLoadingLike] = useState(false);
 
   return (
     <>
@@ -81,6 +79,7 @@ export default function CardPost({
                 height: 48,
                 borderRadius: "50%",
               }}
+              src={`https://i.pravatar.cc/300?img=${authorID}`}
             >
               A
             </Avatar>
@@ -91,9 +90,6 @@ export default function CardPost({
               </Typography>
               <Typography fontSize={12} color="text.secondary">
                 {subtitle}
-              </Typography>
-              <Typography fontSize={12} color="text.secondary">
-                {time}
               </Typography>
             </Box>
           </Stack>
@@ -129,7 +125,7 @@ export default function CardPost({
               cursor: "pointer",
               textDecoration: "underline",
             }}
-            onClick={() => setDialogLike(true)}
+            onClick={() => setDialogLike({ status: true, postID: id })}
           >
             👍 {likes} Me gustas
           </Typography>
@@ -142,55 +138,43 @@ export default function CardPost({
         <Divider sx={(t) => ({ borderColor: t.palette.divider })} />
 
         <Stack direction="row" justifyContent="space-around" py={1}>
-          <PostAction icon={<ThumbsUp size={18} />} label="Recomendar" />
+          <PostAction
+            key={id}
+            icon={<ThumbsUp size={18} />}
+            label="Me gusta"
+            onClick={async () => {
+              setLoadingLike(true);
+
+              const res = await CreateOrDeleteLikePost(
+                Number(id),
+                Number(user?.id)
+              );
+
+              setLoadingLike(false);
+
+              if (res.status) {
+                const status = res.action === "added";
+                showAlert(res.message, "success");
+                updateHasLikeUser(id, status);
+                updateHasLikeUserMtpost(id, status);
+              }
+            }}
+            disabled={loadingLike}
+            userHasLiked={userHasLiked}
+          />
           <PostAction icon={<MessageCircle size={18} />} label="Comentar" />
           <PostAction icon={<Repeat2 size={18} />} label="Compartir" />
           <PostAction icon={<Send size={18} />} label="Enviar" />
         </Stack>
       </Card>
 
-      <Dialog
-        open={dialogLike}
-        onClose={() => setDialogLike(false)}
-        fullWidth
-        maxWidth="md"
-      >
-        <DialogTitle variant="h4" fontWeight={"bold"} color="primary">
-          Usuarios que interactuaron con la publicación
-        </DialogTitle>
-
-        <IconButton
-          onClick={() => setDialogLike(false)}
-          sx={() => ({
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: "text.secondary",
-          })}
-        >
-          <X />
-        </IconButton>
-
-        <DialogContent>
-          {likesList.length === 0 && (
-            <Typography variant="subtitle2" color="text.secondary">
-              Aún no se registran interacciones en esta publicación.
-            </Typography>
-          )}
-
-          {Array.isArray(likesList) &&
-            likesList.map((x) => (
-              <Card sx={{ m: 2 }}>
-                <CardHeader
-                  title={x.User.email}
-                  subheader={x.createdAt}
-                  avatar={<Avatar />}
-                  action={<ThumbsUp />}
-                />
-              </Card>
-            ))}
-        </DialogContent>
-      </Dialog>
+      {status && postID !== 0 && (
+        <ListUserLikePostDialog
+          status={status}
+          onClose={() => setDialogLike({ status: false, postID: id })}
+          postID={Number(postID)}
+        />
+      )}
     </>
   );
 }
@@ -198,20 +182,33 @@ export default function CardPost({
 interface PostActionProps {
   icon: React.ReactNode;
   label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  userHasLiked?: boolean;
 }
 
-function PostAction({ icon, label }: PostActionProps) {
+function PostAction({
+  icon,
+  label,
+  onClick,
+  disabled = false,
+  userHasLiked = false,
+}: PostActionProps) {
   return (
     <Button
+      onClick={onClick}
       startIcon={icon}
       sx={(t) => ({
         textTransform: "none",
-        fontSize: 14,
-        border: "none",
+
+        color: userHasLiked ? t.palette.primary.main : t.palette.text.secondary,
         "&:hover": {
-          bgcolor: t.palette.action.hoverOpacity,
+          bgcolor: t.palette.action.hover,
         },
       })}
+      disabled={disabled}
+      // loading={disabled}
+      variant="text"
     >
       {label}
     </Button>

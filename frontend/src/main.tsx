@@ -6,6 +6,8 @@ import { BrowserRouter } from "react-router-dom";
 import { AlertProvider } from "./context/alertsContext.tsx";
 import { AuthProvider } from "./context/authContext.tsx";
 import { PostProvider } from "./context/postContext.tsx";
+import { LikeProvider } from "./context/likeContext.tsx";
+import { UserProvider } from "./context/userContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -13,7 +15,11 @@ createRoot(document.getElementById("root")!).render(
       <AlertProvider>
         <AuthProvider>
           <PostProvider>
-            <App />
+            <LikeProvider>
+              <UserProvider>
+                <App />
+              </UserProvider>
+            </LikeProvider>
           </PostProvider>
         </AuthProvider>
       </AlertProvider>

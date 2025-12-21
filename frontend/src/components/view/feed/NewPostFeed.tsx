@@ -2,8 +2,11 @@ import { Card, Box, Typography, Stack, Divider, Avatar } from "@mui/material";
 import { Play, Image as ImageIcon, FileText } from "lucide-react";
 import CreatePostDialog from "./Dialog/CreatePostDialog";
 import { useState } from "react";
+import { useAuth } from "../../../context/authContext";
 
 export default function NewPostFeed() {
+  const { user: authUser } = useAuth();
+
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,6 +27,7 @@ export default function NewPostFeed() {
               borderRadius: "50%",
               border: "1px solid text.secondary",
             }}
+            src={`https://i.pravatar.cc/300?img=${authUser?.id}`}
           >
             A
           </Avatar>

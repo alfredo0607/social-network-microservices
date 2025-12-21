@@ -32,7 +32,6 @@ export async function seed() {
       lastName: lastName,
     });
 
-    // Asegurar que el alias sea único añadiendo número si es necesario
     let finalAlias = alias;
     let counter = 1;
     while (users.some((u) => u.alias === finalAlias)) {
@@ -65,7 +64,6 @@ export async function seed() {
   const posts = [];
   const totalPosts = 50;
 
-  // Tipos de mensajes realistas
   const messageTemplates = [
     "Acabo de tener una experiencia increíble en {lugar} 🎉",
     "Reflexionando sobre {tema} hoy... ¿qué opinan?",
@@ -79,13 +77,11 @@ export async function seed() {
     "Pensamientos aleatorios a las {hora}... 💭",
   ];
 
-  // Crear posts
   for (let i = 0; i < totalPosts; i++) {
     const randomUser = users[Math.floor(Math.random() * users.length)];
     const template =
       messageTemplates[Math.floor(Math.random() * messageTemplates.length)];
 
-    // Reemplazar placeholders en los templates
     let message = template
       .replace("{lugar}", faker.location.city())
       .replace("{tema}", faker.lorem.words(3))
@@ -105,7 +101,6 @@ export async function seed() {
           .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
       );
 
-    // Añadir texto adicional a algunos posts
     if (Math.random() > 0.5) {
       message += "\n\n" + faker.lorem.paragraph();
     }
@@ -120,9 +115,8 @@ export async function seed() {
 
     posts.push(post);
 
-    // 70% de probabilidad de añadir imágenes al post
     if (Math.random() < 0.7) {
-      const totalImages = Math.floor(Math.random() * 4) + 1; // 1-4 imágenes
+      const totalImages = Math.floor(Math.random() * 4) + 1;
 
       for (let j = 0; j < totalImages; j++) {
         const ext = faker.helpers.arrayElement(["jpg", "png", "webp", "jpeg"]);
@@ -155,15 +149,13 @@ export async function seed() {
   }
 
   console.log("\n❤️ Creando likes...");
-  // Crear likes de manera aleatoria
+
   let totalLikesCreated = 0;
 
   for (const post of posts) {
-    // Número aleatorio de likes por post (0 a 15)
     const totalLikesForPost = Math.floor(Math.random() * 16);
 
     if (totalLikesForPost > 0) {
-      // Mezclar usuarios para obtener una selección aleatoria
       const shuffledUsers = [...users].sort(() => Math.random() - 0.5);
 
       for (let i = 0; i < totalLikesForPost && i < shuffledUsers.length; i++) {
@@ -180,7 +172,6 @@ export async function seed() {
           });
           totalLikesCreated++;
         } catch (error) {
-          // Ignorar error de like duplicado (usuario ya dio like)
           if (!error.message.includes("Unique constraint")) {
             console.error("Error creando like:", error.message);
           }
@@ -191,12 +182,10 @@ export async function seed() {
     }
   }
 
-  // Crear algunos posts destacados con muchos likes
   console.log("\n🏆 Creando posts destacados...");
   const featuredPosts = [];
   const numFeaturedPosts = Math.min(5, posts.length);
 
-  // Seleccionar posts aleatorios para destacar
   for (let i = 0; i < numFeaturedPosts; i++) {
     let randomPost;
     do {
@@ -205,13 +194,11 @@ export async function seed() {
 
     featuredPosts.push(randomPost);
 
-    // Añadir likes masivos a posts destacados
     const minLikes = Math.min(20, users.length);
     const maxLikes = users.length;
     const targetLikes =
       Math.floor(Math.random() * (maxLikes - minLikes + 1)) + minLikes;
 
-    // Mezclar usuarios
     const shuffledUsers = [...users].sort(() => Math.random() - 0.5);
     const usersToLike = shuffledUsers.slice(0, targetLikes);
 
@@ -231,7 +218,7 @@ export async function seed() {
         likesAdded++;
         totalLikesCreated++;
       } catch (error) {
-        // Ignorar likes duplicados
+        console.log(error);
       }
     }
 
@@ -250,7 +237,6 @@ export async function seed() {
 
   console.log(`   ❤️ Likes totales: ${totalLikesCreated}`);
 
-  // Mostrar estadísticas adicionales
   const userWithMostPosts = await prisma.user.findFirst({
     include: {
       _count: {

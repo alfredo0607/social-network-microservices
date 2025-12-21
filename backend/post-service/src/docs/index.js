@@ -2,97 +2,48 @@ const swaggerOptions = {
   openapi: "3.0.3",
 
   info: {
-    title: "Posts Service - Social Network Microservices",
-    description:
-      "API para la gestión de publicaciones (posts) en la plataforma de microservicios de red social. Permite crear, obtener, actualizar y eliminar publicaciones, así como manejar likes e imágenes asociadas.",
+    title: "Post Service - Social Network Microservices",
+    description: "API para gestión de publicaciones en la red social.",
     version: "1.0.0",
     contact: {
       name: "Alfredo Jose Dominguez Hernandez",
       email: "alfredojosedominguezhernandez@gmail.com",
       url: "https://github.com/alfredo0607/social-network-microservices",
     },
-    license: {
-      name: "MIT",
-      url: "https://opensource.org/licenses/MIT",
-    },
   },
 
   servers: [
     {
-      url: "http://localhost:3002", // Asumiendo que el servicio de posts corre en puerto diferente
-      description: "Servidor local de posts",
-    },
-    {
-      url: "https://api.ejemplo.com/posts",
-      description: "Servidor de producción",
+      url: "http://localhost:3001",
+      description: "Servidor local",
     },
   ],
 
   tags: [
     {
       name: "Publicaciones",
-      description: "Endpoints para gestión de publicaciones (posts)",
-    },
-    {
-      name: "Likes",
-      description: "Endpoints para gestión de likes en publicaciones",
-    },
-    {
-      name: "Imágenes",
-      description: "Endpoints para gestión de imágenes en publicaciones",
+      description: "Endpoints para gestión de publicaciones",
     },
   ],
 
   paths: {
-    // ==================== RUTAS DE PUBLICACIONES ====================
-
-    "/api/posts/get-all-posts": {
+    "/api/v1/posts/get-posts-paginated": {
       get: {
         tags: ["Publicaciones"],
-        summary: "Obtener todas las publicaciones",
+        summary: "Obtener publicaciones con paginación",
         description:
-          "Retorna todas las publicaciones del sistema con sus relaciones (usuario, likes, imágenes)",
-        operationId: "getAllPosts",
-
-        responses: {
-          200: {
-            description: "Lista de publicaciones obtenida exitosamente",
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/PostsListResponse",
-                },
-              },
-            },
+          "Retorna una lista paginada de publicaciones con opciones de filtrado y ordenamiento",
+        security: [
+          {
+            bearerAuth: [],
           },
-          500: {
-            description: "Error interno del servidor",
-            content: {
-              "application/json": {
-                schema: {
-                  $ref: "#/components/schemas/ErrorResponse",
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-
-    "/api/posts/get-posts-paginated": {
-      get: {
-        tags: ["Publicaciones"],
-        summary: "Obtener publicaciones paginadas",
-        description:
-          "Retorna publicaciones con paginación, filtros y ordenamiento",
-        operationId: "getPostsPaginated",
-
+        ],
         parameters: [
           {
             name: "page",
             in: "query",
-            description: "Número de página",
             required: false,
+            description: "Número de página",
             schema: {
               type: "integer",
               minimum: 1,
@@ -103,8 +54,8 @@ const swaggerOptions = {
           {
             name: "limit",
             in: "query",
-            description: "Cantidad de elementos por página",
             required: false,
+            description: "Límite de publicaciones por página (máximo 100)",
             schema: {
               type: "integer",
               minimum: 1,
@@ -116,22 +67,22 @@ const swaggerOptions = {
           {
             name: "userId",
             in: "query",
-            description: "Filtrar por ID de usuario",
             required: false,
+            description: "Filtrar por ID de usuario",
             schema: {
               type: "integer",
               minimum: 1,
-              example: 5,
+              example: 123,
             },
           },
           {
             name: "sortBy",
             in: "query",
-            description: "Campo para ordenar los resultados",
             required: false,
+            description: "Campo por el cual ordenar",
             schema: {
               type: "string",
-              enum: ["createdAt", "id"],
+              enum: ["createdAt", "likeCount", "id"],
               default: "createdAt",
               example: "createdAt",
             },
@@ -139,8 +90,8 @@ const swaggerOptions = {
           {
             name: "order",
             in: "query",
-            description: "Dirección del ordenamiento",
             required: false,
+            description: "Orden de los resultados",
             schema: {
               type: "string",
               enum: ["asc", "desc"],
@@ -149,10 +100,9 @@ const swaggerOptions = {
             },
           },
         ],
-
         responses: {
           200: {
-            description: "Publicaciones paginadas obtenidas exitosamente",
+            description: "Publicaciones obtenidas exitosamente",
             content: {
               "application/json": {
                 schema: {
@@ -161,8 +111,18 @@ const swaggerOptions = {
               },
             },
           },
+          401: {
+            description: "Token inválido o no proporcionado",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
           422: {
-            description: "Parámetros de consulta inválidos",
+            description: "Error de validación en parámetros",
             content: {
               "application/json": {
                 schema: {
@@ -185,30 +145,33 @@ const swaggerOptions = {
       },
     },
 
-    "/api/posts/get-posts-by-user/{userId}": {
+    "/api/v1/posts/get-posts-by-user/{userId}": {
       get: {
         tags: ["Publicaciones"],
-        summary: "Obtener publicaciones por usuario",
-        description: "Retorna todas las publicaciones de un usuario específico",
-        operationId: "getPostsByUser",
-
+        summary: "Obtener publicaciones de un usuario específico",
+        description: "Retorna las publicaciones de un usuario con paginación",
+        security: [
+          {
+            bearerAuth: [],
+          },
+        ],
         parameters: [
           {
             name: "userId",
             in: "path",
-            description: "ID del usuario",
             required: true,
+            description: "ID del usuario",
             schema: {
               type: "integer",
               minimum: 1,
-              example: 1,
+              example: 123,
             },
           },
           {
             name: "page",
             in: "query",
-            description: "Número de página",
             required: false,
+            description: "Número de página",
             schema: {
               type: "integer",
               minimum: 1,
@@ -219,8 +182,8 @@ const swaggerOptions = {
           {
             name: "limit",
             in: "query",
-            description: "Cantidad de elementos por página",
             required: false,
+            description: "Límite de publicaciones por página (máximo 50)",
             schema: {
               type: "integer",
               minimum: 1,
@@ -230,7 +193,6 @@ const swaggerOptions = {
             },
           },
         ],
-
         responses: {
           200: {
             description: "Publicaciones del usuario obtenidas exitosamente",
@@ -238,6 +200,16 @@ const swaggerOptions = {
               "application/json": {
                 schema: {
                   $ref: "#/components/schemas/UserPostsResponse",
+                },
+              },
+            },
+          },
+          401: {
+            description: "Token inválido o no proporcionado",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
                 },
               },
             },
@@ -253,7 +225,7 @@ const swaggerOptions = {
             },
           },
           422: {
-            description: "Parámetros inválidos",
+            description: "Error de validación en parámetros",
             content: {
               "application/json": {
                 schema: {
@@ -276,41 +248,61 @@ const swaggerOptions = {
       },
     },
 
-    "/api/posts/get-post/{postId}": {
-      get: {
+    "/api/v1/posts/create-post": {
+      post: {
         tags: ["Publicaciones"],
-        summary: "Obtener publicación específica",
+        summary: "Crear una nueva publicación",
         description:
-          "Retorna una publicación específica por su ID con todas sus relaciones",
-        operationId: "getPostById",
-
-        parameters: [
+          "Crea una nueva publicación con texto opcionalmente imágenes",
+        security: [
           {
-            name: "postId",
-            in: "path",
-            description: "ID de la publicación",
-            required: true,
-            schema: {
-              type: "integer",
-              minimum: 1,
-              example: 123,
-            },
+            bearerAuth: [],
           },
         ],
-
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/CreatePostRequest",
+              },
+            },
+          },
+        },
         responses: {
-          200: {
-            description: "Publicación obtenida exitosamente",
+          201: {
+            description: "Publicación creada exitosamente",
             content: {
               "application/json": {
                 schema: {
-                  $ref: "#/components/schemas/SinglePostResponse",
+                  $ref: "#/components/schemas/CreatePostResponse",
                 },
               },
             },
           },
-          404: {
-            description: "Publicación no encontrada",
+          400: {
+            description: "Usuario no existe",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          401: {
+            description: "Token inválido o no proporcionado",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorResponse",
+                },
+              },
+            },
+          },
+          409: {
+            description:
+              "Conflicto - Ya existe una publicación con estos datos",
             content: {
               "application/json": {
                 schema: {
@@ -320,7 +312,7 @@ const swaggerOptions = {
             },
           },
           422: {
-            description: "Parámetro inválido",
+            description: "Error de validación en el cuerpo de la petición",
             content: {
               "application/json": {
                 schema: {
@@ -338,134 +330,6 @@ const swaggerOptions = {
                 },
               },
             },
-          },
-        },
-      },
-    },
-
-    // ==================== RUTAS DE LIKES (ejemplo de expansión futura) ====================
-
-    "/api/posts/like/{postId}": {
-      post: {
-        tags: ["Likes"],
-        summary: "Dar like a una publicación",
-        description:
-          "Registra un like del usuario autenticado a una publicación",
-        operationId: "likePost",
-
-        security: [
-          {
-            bearerAuth: [],
-          },
-        ],
-
-        parameters: [
-          {
-            name: "postId",
-            in: "path",
-            description: "ID de la publicación a la que se dará like",
-            required: true,
-            schema: {
-              type: "integer",
-              minimum: 1,
-            },
-          },
-        ],
-
-        responses: {
-          200: {
-            description: "Like registrado exitosamente",
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  properties: {
-                    message: {
-                      type: "string",
-                      example: "Like registrado exitosamente",
-                    },
-                  },
-                },
-              },
-            },
-          },
-          400: {
-            description: "El usuario ya dio like a esta publicación",
-          },
-          404: {
-            description: "Publicación no encontrada",
-          },
-          401: {
-            description: "Usuario no autenticado",
-          },
-          500: {
-            description: "Error interno del servidor",
-          },
-        },
-      },
-    },
-
-    // ==================== RUTAS DE IMÁGENES (ejemplo de expansión futura) ====================
-
-    "/api/posts/{postId}/images": {
-      post: {
-        tags: ["Imágenes"],
-        summary: "Subir imagen a publicación",
-        description: "Sube una o más imágenes a una publicación existente",
-        operationId: "uploadPostImages",
-
-        security: [
-          {
-            bearerAuth: [],
-          },
-        ],
-
-        parameters: [
-          {
-            name: "postId",
-            in: "path",
-            description: "ID de la publicación",
-            required: true,
-            schema: {
-              type: "integer",
-              minimum: 1,
-            },
-          },
-        ],
-
-        requestBody: {
-          required: true,
-          content: {
-            "multipart/form-data": {
-              schema: {
-                type: "object",
-                properties: {
-                  images: {
-                    type: "array",
-                    items: {
-                      type: "string",
-                      format: "binary",
-                    },
-                    description: "Archivos de imagen a subir",
-                  },
-                },
-              },
-            },
-          },
-        },
-
-        responses: {
-          200: {
-            description: "Imágenes subidas exitosamente",
-          },
-          404: {
-            description: "Publicación no encontrada",
-          },
-          401: {
-            description: "Usuario no autenticado o no autorizado",
-          },
-          500: {
-            description: "Error interno del servidor",
           },
         },
       },
@@ -478,191 +342,180 @@ const swaggerOptions = {
         type: "http",
         scheme: "bearer",
         bearerFormat: "JWT",
-        description: "JWT token obtenido del servicio de autenticación",
       },
     },
 
     schemas: {
-      // ==================== MODELOS BASE ====================
-
-      User: {
+      CreatePostRequest: {
         type: "object",
+        required: ["message", "userId"],
         properties: {
-          id: {
-            type: "integer",
-            example: 1,
-            description: "ID único del usuario",
-          },
-          email: {
+          message: {
             type: "string",
-            format: "email",
-            example: "usuario@ejemplo.com",
-            description: "Email del usuario",
-          },
-          // Puedes agregar más campos del usuario según tu modelo
-        },
-      },
-
-      Like: {
-        type: "object",
-        properties: {
-          id: {
-            type: "integer",
-            example: 1,
-            description: "ID único del like",
+            minLength: 1,
+            maxLength: 2000,
+            description: "Contenido de la publicación",
+            example:
+              "¡Hola mundo! Esta es mi primera publicación en la red social.",
           },
           userId: {
             type: "integer",
-            example: 1,
-            description: "ID del usuario que dio like",
-          },
-          postId: {
-            type: "integer",
+            minimum: 1,
+            description: "ID del usuario que crea la publicación",
             example: 123,
-            description: "ID de la publicación",
           },
-          createdAt: {
-            type: "string",
-            format: "date-time",
-            example: "2024-01-01T12:00:00.000Z",
-            description: "Fecha y hora del like",
-          },
-          User: {
-            $ref: "#/components/schemas/User",
+          images: {
+            type: "array",
+            description: "Array de imágenes opcionales para la publicación",
+            items: {
+              type: "object",
+              properties: {
+                nameServer: {
+                  type: "string",
+                  description: "Nombre del archivo en el servidor",
+                  example: "image_123456789.jpg",
+                },
+                nameClient: {
+                  type: "string",
+                  description: "Nombre original del archivo",
+                  example: "mi_foto.jpg",
+                },
+                ext: {
+                  type: "string",
+                  description: "Extensión del archivo",
+                  example: "jpg",
+                },
+                size: {
+                  type: "integer",
+                  minimum: 1,
+                  description: "Tamaño del archivo en bytes",
+                  example: 102400,
+                },
+              },
+            },
           },
         },
       },
 
-      PostImage: {
+      Image: {
         type: "object",
         properties: {
           id: {
             type: "integer",
             example: 1,
-            description: "ID único de la imagen",
           },
           nameServer: {
             type: "string",
-            example: "image_12345.jpg",
-            description: "Nombre del archivo en el servidor",
+            example: "image_123456789.jpg",
           },
           nameClient: {
             type: "string",
             example: "mi_foto.jpg",
-            description: "Nombre original del archivo del cliente",
           },
           ext: {
             type: "string",
             example: "jpg",
-            description: "Extensión del archivo",
           },
           size: {
             type: "integer",
-            example: 1024576,
-            description: "Tamaño del archivo en bytes",
+            example: 102400,
           },
-          createdAt: {
-            type: "string",
-            format: "date-time",
-            example: "2024-01-01T12:00:00.000Z",
-            description: "Fecha y hora de subida",
+          postId: {
+            type: "integer",
+            example: 456,
           },
         },
       },
 
       Post: {
         type: "object",
-        required: ["message", "userId"],
         properties: {
           id: {
             type: "integer",
-            example: 123,
-            description: "ID único de la publicación",
+            example: 456,
           },
           message: {
             type: "string",
             example: "¡Hola mundo! Esta es mi primera publicación.",
-            description: "Contenido de la publicación",
           },
           userId: {
             type: "integer",
-            example: 1,
-            description: "ID del usuario creador",
+            example: 123,
           },
           createdAt: {
             type: "string",
-            format: "date-time",
-            example: "2024-01-01T12:00:00.000Z",
-            description: "Fecha y hora de creación",
+            description: "Fecha formateada en español",
+            example: "05, Nov del 2024",
+          },
+          userHasLiked: {
+            type: "boolean",
+            description:
+              "Indica si el usuario actual dio like a esta publicación",
+            example: true,
+          },
+          likeCount: {
+            type: "integer",
+            description: "Número total de likes en la publicación",
+            example: 42,
           },
           User: {
-            $ref: "#/components/schemas/User",
-            description: "Información del usuario creador",
-          },
-          Like: {
-            type: "array",
-            items: {
-              $ref: "#/components/schemas/Like",
+            type: "object",
+            properties: {
+              id: {
+                type: "integer",
+                example: 123,
+              },
+              email: {
+                type: "string",
+                example: "usuario@ejemplo.com",
+              },
+              name: {
+                type: "string",
+                example: "Juan Pérez",
+              },
             },
-            description: "Lista de likes de la publicación",
           },
           PostImage: {
             type: "array",
             items: {
-              $ref: "#/components/schemas/PostImage",
+              $ref: "#/components/schemas/Image",
             },
-            description: "Lista de imágenes de la publicación",
           },
         },
       },
 
-      // ==================== SCHEMAS DE RESPUESTA ====================
-
-      PostWithLikeCount: {
-        allOf: [
-          {
-            $ref: "#/components/schemas/Post",
-          },
-          {
-            type: "object",
-            properties: {
-              likeCount: {
-                type: "integer",
-                example: 42,
-                description: "Número total de likes",
-              },
-            },
-          },
-        ],
-      },
-
-      PostsListResponse: {
+      PaginationInfo: {
         type: "object",
         properties: {
-          errores: {
-            type: "string",
-            example: "",
-            description: "Cadena vacía si no hay errores",
+          totalPosts: {
+            type: "integer",
+            description: "Número total de publicaciones",
+            example: 150,
           },
-          data: {
-            type: "object",
-            properties: {
-              posts: {
-                type: "array",
-                items: {
-                  $ref: "#/components/schemas/PostWithLikeCount",
-                },
-              },
-              totalPosts: {
-                type: "integer",
-                example: 150,
-                description: "Número total de publicaciones",
-              },
-              message: {
-                type: "string",
-                example: "Posts obtenidos exitosamente",
-              },
-            },
+          totalPages: {
+            type: "integer",
+            description: "Número total de páginas",
+            example: 15,
+          },
+          currentPage: {
+            type: "integer",
+            description: "Página actual",
+            example: 1,
+          },
+          hasNextPage: {
+            type: "boolean",
+            description: "Indica si hay más páginas",
+            example: true,
+          },
+          hasPreviousPage: {
+            type: "boolean",
+            description: "Indica si hay páginas anteriores",
+            example: false,
+          },
+          limit: {
+            type: "integer",
+            description: "Límite de publicaciones por página",
+            example: 10,
           },
         },
       },
@@ -680,45 +533,20 @@ const swaggerOptions = {
               posts: {
                 type: "array",
                 items: {
-                  $ref: "#/components/schemas/PostWithLikeCount",
+                  $ref: "#/components/schemas/Post",
                 },
               },
               pagination: {
-                type: "object",
-                properties: {
-                  totalPosts: {
-                    type: "integer",
-                    example: 150,
-                  },
-                  totalPages: {
-                    type: "integer",
-                    example: 15,
-                  },
-                  currentPage: {
-                    type: "integer",
-                    example: 1,
-                  },
-                  hasNextPage: {
-                    type: "boolean",
-                    example: true,
-                  },
-                  hasPreviousPage: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  limit: {
-                    type: "integer",
-                    example: 10,
-                  },
-                },
+                $ref: "#/components/schemas/PaginationInfo",
               },
               filters: {
                 type: "object",
                 properties: {
                   userId: {
-                    type: "integer",
-                    nullable: true,
-                    example: 5,
+                    oneOf: [
+                      { type: "integer", example: 123 },
+                      { type: "null" },
+                    ],
                   },
                   sortBy: {
                     type: "string",
@@ -752,7 +580,7 @@ const swaggerOptions = {
               posts: {
                 type: "array",
                 items: {
-                  $ref: "#/components/schemas/PostWithLikeCount",
+                  $ref: "#/components/schemas/Post",
                 },
               },
               pagination: {
@@ -763,7 +591,7 @@ const swaggerOptions = {
                 properties: {
                   id: {
                     type: "integer",
-                    example: 1,
+                    example: 123,
                   },
                 },
               },
@@ -776,7 +604,7 @@ const swaggerOptions = {
         },
       },
 
-      SinglePostResponse: {
+      CreatePostResponse: {
         type: "object",
         properties: {
           errores: {
@@ -787,43 +615,64 @@ const swaggerOptions = {
             type: "object",
             properties: {
               post: {
-                $ref: "#/components/schemas/PostWithLikeCount",
+                type: "object",
+                properties: {
+                  id: {
+                    type: "integer",
+                    example: 456,
+                  },
+                  message: {
+                    type: "string",
+                    example: "¡Hola mundo! Esta es mi primera publicación.",
+                  },
+                  userId: {
+                    type: "integer",
+                    example: 123,
+                  },
+                  createdAt: {
+                    type: "string",
+                    example: "05, Nov del 2024",
+                  },
+                  likeCount: {
+                    type: "integer",
+                    example: 0,
+                  },
+                  User: {
+                    type: "object",
+                    properties: {
+                      id: {
+                        type: "integer",
+                        example: 123,
+                      },
+                      email: {
+                        type: "string",
+                        example: "usuario@ejemplo.com",
+                      },
+                      name: {
+                        type: "string",
+                        example: "Juan Pérez",
+                      },
+                    },
+                  },
+                  Like: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                    },
+                  },
+                  PostImage: {
+                    type: "array",
+                    items: {
+                      $ref: "#/components/schemas/Image",
+                    },
+                  },
+                },
               },
               message: {
                 type: "string",
-                example: "Post obtenido exitosamente",
+                example: "Publicación creada exitosamente",
               },
             },
-          },
-        },
-      },
-
-      PaginationInfo: {
-        type: "object",
-        properties: {
-          totalPosts: {
-            type: "integer",
-            example: 25,
-          },
-          totalPages: {
-            type: "integer",
-            example: 3,
-          },
-          currentPage: {
-            type: "integer",
-            example: 1,
-          },
-          hasNextPage: {
-            type: "boolean",
-            example: true,
-          },
-          hasPreviousPage: {
-            type: "boolean",
-            example: false,
-          },
-          limit: {
-            type: "integer",
-            example: 10,
           },
         },
       },
@@ -834,22 +683,6 @@ const swaggerOptions = {
           errores: {
             type: "string",
             example: "Credenciales inválidas",
-            description: "Mensaje de error descriptivo",
-          },
-          data: {
-            type: "object",
-            example: {},
-            description: "Objeto vacío o datos adicionales del error",
-          },
-        },
-      },
-
-      ValidationError: {
-        type: "object",
-        properties: {
-          errores: {
-            type: "string",
-            example: "El parámetro 'page' debe ser un número entero mayor a 0",
           },
           data: {
             type: "object",
@@ -858,86 +691,6 @@ const swaggerOptions = {
         },
       },
     },
-
-    // ==================== PARÁMETROS REUTILIZABLES ====================
-
-    parameters: {
-      pageParam: {
-        name: "page",
-        in: "query",
-        description: "Número de página",
-        required: false,
-        schema: {
-          type: "integer",
-          minimum: 1,
-          default: 1,
-        },
-      },
-      limitParam: {
-        name: "limit",
-        in: "query",
-        description: "Cantidad de elementos por página",
-        required: false,
-        schema: {
-          type: "integer",
-          minimum: 1,
-          maximum: 100,
-          default: 10,
-        },
-      },
-    },
-
-    // ==================== RESPONSES REUTILIZABLES ====================
-
-    responses: {
-      UnauthorizedError: {
-        description: "Token inválido o expirado",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ErrorResponse",
-            },
-          },
-        },
-      },
-      NotFoundError: {
-        description: "Recurso no encontrado",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ErrorResponse",
-            },
-          },
-        },
-      },
-      ValidationError: {
-        description: "Error de validación de parámetros",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ValidationError",
-            },
-          },
-        },
-      },
-      ServerError: {
-        description: "Error interno del servidor",
-        content: {
-          "application/json": {
-            schema: {
-              $ref: "#/components/schemas/ErrorResponse",
-            },
-          },
-        },
-      },
-    },
-  },
-
-  // ==================== CONFIGURACIONES ADICIONALES ====================
-
-  externalDocs: {
-    description: "Documentación completa del proyecto",
-    url: "https://github.com/alfredo0607/social-network-microservices",
   },
 };
 

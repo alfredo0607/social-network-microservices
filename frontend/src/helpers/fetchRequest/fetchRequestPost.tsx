@@ -2,7 +2,6 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  // baseURL: "https://api-panel.bartik-Ing.com:5004/api/v1",
   baseURL: "http://localhost:3003/api/v1",
 });
 

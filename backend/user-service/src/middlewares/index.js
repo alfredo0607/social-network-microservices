@@ -1,6 +1,6 @@
 import jwt from "jwt-simple";
 import moment from "moment";
-import { SECRET_KEY_JWT } from "../config";
+import { SECRET_KEY_JWT } from "../config.js";
 
 export const checkToken = async (req, res, next) => {
   if (!req.headers.authorization) {

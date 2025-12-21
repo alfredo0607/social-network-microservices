@@ -1,18 +1,31 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Box, Button, Typography } from "@mui/material";
-import { MapPin, Shield } from "lucide-react";
+import { AtSign } from "lucide-react";
+import { useEffect } from "react";
+import { useUser } from "../../../context/userContext";
 
-export default function CardDescriptionProfile() {
+interface Props {
+  userID: number;
+}
+
+export default function CardDescriptionProfile({ userID }: Props) {
+  const { getUserById, detailUser } = useUser();
+
+  useEffect(() => {
+    getUserById(userID);
+  }, [userID]);
+
   return (
     <>
-      <Box sx={{ flex: 1 }}>
+      <Box sx={{ flex: 1, ml: 4, mt:4 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
           <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-            Alfredo Domínguez
+            {detailUser?.name}
           </Typography>
           <Button
             variant="outlined"
             size="small"
-            startIcon={<Shield size={16} />}
+            startIcon={<AtSign size={16} />}
             sx={{
               color: "#58a6ff",
               borderColor: "#58a6ff",
@@ -20,19 +33,15 @@ export default function CardDescriptionProfile() {
               borderRadius: 5,
             }}
           >
-            Añadir insignia de verificación
+            {detailUser?.alias}
           </Button>
         </Box>
 
-        <Typography sx={{ mb: 2 }}>
-          Fullstack Software Engineer 💻 / JavaScript / Typescript / React /
-          React Native / NodeJS / AWS / Azure / SQL / NO SQL
-        </Typography>
+        <Typography sx={{ mb: 2 }}>{detailUser?.email}</Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <MapPin size={16} />
           <Typography>
-            Barranquilla, Atlántico, Colombia ·{" "}
+            Cuenta creada el : {detailUser?.createdAt}{" "}
             <span style={{ color: "#58a6ff", cursor: "pointer" }}>
               Información de contacto
             </span>
@@ -40,7 +49,7 @@ export default function CardDescriptionProfile() {
         </Box>
 
         <Typography sx={{ color: "#58a6ff", mb: 2, cursor: "pointer" }}>
-          31 contactos
+          {detailUser?.age} años
         </Typography>
       </Box>
     </>

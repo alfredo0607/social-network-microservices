@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 
 process.env.SECRET_KEY_JWT = "test-secret";
 
-// 🔥 MOCK ANTES DE IMPORTAR APP
 jest.unstable_mockModule("../database/db.js", () => ({
   prisma: {
     user: {
@@ -14,7 +13,6 @@ jest.unstable_mockModule("../database/db.js", () => ({
   },
 }));
 
-// ⬇️ IMPORTS DESPUÉS DEL MOCK
 const { prisma } = await import("../database/db.js");
 const { default: app } = await import("../app.js");
 
@@ -72,7 +70,6 @@ describe("AUTH /relogin", () => {
       password: await bcrypt.hash("123456", 10),
     });
 
-    // Login primero
     const login = await request(app).post("/api/v1/auth/login").send({
       email: "test@test.com",
       password: "123456",

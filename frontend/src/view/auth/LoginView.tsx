@@ -42,7 +42,7 @@ const schema: yup.ObjectSchema<LoginFormInputs> = yup.object().shape({
 });
 
 export default function LoginView() {
-  const { login, isLoading, error } = useAuth();
+  const { login, isLoading, error, closeError } = useAuth();
 
   const {
     register,
@@ -91,7 +91,7 @@ export default function LoginView() {
               align="center"
               sx={{ fontSize: 15, fontWeight: "bold" }}
             >
-              INICIAR SESIÓN EN TU CUENTA
+              Iniciar sesión en Instamood
             </Typography>
           </Box>
 
@@ -102,7 +102,6 @@ export default function LoginView() {
               placeholder="Email"
               margin="normal"
               type="email"
-              // slotProps={{ InputLabelProps: { shrink: true } }}
               error={!!errors?.email}
               variant="outlined"
               {...register("email")}
@@ -131,7 +130,7 @@ export default function LoginView() {
                         aria-label="close"
                         color="inherit"
                         size="small"
-                        // onClick={handleClearError}
+                        onClick={closeError}
                       >
                         <X />
                       </IconButton>

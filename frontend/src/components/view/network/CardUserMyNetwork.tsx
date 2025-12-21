@@ -10,7 +10,9 @@ import {
 import { UserPlus } from "lucide-react";
 
 export interface UserCardProps {
+  id: number;
   name: string;
+  alias: string;
   role?: string;
   avatarUrl?: string;
   onConnect?: () => void;
@@ -18,7 +20,7 @@ export interface UserCardProps {
 
 export const CardUserMyNetwork = ({
   name,
-  role = "Profesional",
+  alias,
   avatarUrl,
   onConnect,
 }: UserCardProps) => {
@@ -45,7 +47,7 @@ export const CardUserMyNetwork = ({
           <Box textAlign="center">
             <Typography fontWeight={600}>{name}</Typography>
             <Typography variant="body2" color="text.secondary">
-              {role}
+              {alias}
             </Typography>
           </Box>
 

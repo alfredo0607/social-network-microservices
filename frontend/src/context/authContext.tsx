@@ -51,6 +51,7 @@ interface AuthContextType {
   relogin: () => Promise<void>;
   logout: () => void;
   changeDarkMode: (newThema: string) => Promise<void>;
+  closeError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -129,7 +130,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       const token_current = getUserToken();
-      if (!token_current) throw new Error("No token found");
+      if (!token_current) return;
       setRequestToken(token_current);
 
       const {
@@ -200,8 +201,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }));
   };
 
+  const closeError = () => {
+    changeState("error", { type: "", message: "" });
+  };
+
   useEffect(() => {
     relogin();
+
+    const thema = localStorage.getItem("theme_app") ?? "light";
+
+    changeDarkMode(thema);
   }, []);
 
   const value: AuthContextType = {
@@ -216,6 +225,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     relogin,
     logout,
     changeDarkMode,
+    closeError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

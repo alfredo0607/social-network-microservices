@@ -75,6 +75,7 @@ export default function CardUserInfo() {
               fontSize: 36,
               fontWeight: 600,
             }}
+            src={`https://i.pravatar.cc/300?img=${authUser?.id}`}
           >
             {displayUser.name?.charAt(0) || "A"}
           </Avatar>
@@ -83,7 +84,6 @@ export default function CardUserInfo() {
 
       <CardContent sx={{ pt: 2 }}>
         <Stack spacing={1.2}>
-          {/* Nombre */}
           {isLoading ? (
             <TextSkeleton width="70%" />
           ) : (
@@ -92,7 +92,6 @@ export default function CardUserInfo() {
             </Typography>
           )}
 
-          {/* Email */}
           {isLoading ? (
             <TextSkeleton width="85%" />
           ) : (
@@ -111,7 +110,6 @@ export default function CardUserInfo() {
             </Tooltip>
           )}
 
-          {/* Fecha */}
           {isLoading ? (
             <TextSkeleton width="50%" />
           ) : (
@@ -122,7 +120,6 @@ export default function CardUserInfo() {
             </Tooltip>
           )}
 
-          {/* Alias */}
           {isLoading ? (
             <Skeleton
               variant="rectangular"

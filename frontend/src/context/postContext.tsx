@@ -10,6 +10,7 @@ import {
 interface User {
   id: number;
   email: string;
+  name: string;
 }
 
 interface Like {
@@ -36,6 +37,7 @@ interface Post {
   Like: Like[];
   PostImage: Image[];
   likeCount: number;
+  userHasLiked: boolean;
 }
 
 interface CreatePostUser {
@@ -67,7 +69,8 @@ interface PostContextType {
   getPostList: (page: number) => Promise<void>;
   CreatePostUser: (post: CreatePostUser) => Promise<CreatePostResponse>;
   getPostListById: (userID: number, page: number) => Promise<void>;
-  //   logout: () => void;
+  updateHasLikeUser: (postID: number, status: boolean) => Promise<void>;
+  updateHasLikeUserMtpost: (postID: number, status: boolean) => Promise<void>;
 }
 
 const PostContext = createContext<PostContextType | undefined>(undefined);
@@ -221,6 +224,42 @@ export const PostProvider = ({ children }: PostProviderProps) => {
     }
   };
 
+  const updateHasLikeUser = async (postID: number, status: boolean) => {
+    setAuthState((prev) => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        post: prev.data.post.map((x) =>
+          Number(x.id) === Number(postID)
+            ? {
+                ...x,
+                userHasLiked: status,
+                likeCount: status ? x.likeCount + 1 : x.likeCount - 1,
+              }
+            : x
+        ),
+      },
+    }));
+  };
+
+  const updateHasLikeUserMtpost = async (postID: number, status: boolean) => {
+    setAuthState((prev) => ({
+      ...prev,
+      myPost: {
+        ...prev.myPost,
+        post: prev.myPost.post.map((x) =>
+          Number(x.id) === Number(postID)
+            ? {
+                ...x,
+                userHasLiked: status,
+                likeCount: status ? x.likeCount + 1 : x.likeCount - 1,
+              }
+            : x
+        ),
+      },
+    }));
+  };
+
   const value: PostContextType = {
     data: authState.data,
     myPost: authState.myPost,
@@ -231,6 +270,8 @@ export const PostProvider = ({ children }: PostProviderProps) => {
     getPostList,
     CreatePostUser,
     getPostListById,
+    updateHasLikeUser,
+    updateHasLikeUserMtpost,
   };
 
   return <PostContext.Provider value={value}>{children}</PostContext.Provider>;

@@ -128,6 +128,9 @@ routerPost.get(
 
           return {
             ...post,
+            createdAt: moment(post.createdAt)
+              .locale("es")
+              .format("DD[,] MMM [del] YYYY"),
             likeCount: totalLikes,
             userHasLiked: userLiked,
             userLike: userLiked ? post.Like[0] : null,
@@ -217,18 +220,17 @@ routerPost.get(
                 name: true,
               },
             },
+            PostImage: true,
             Like: {
-              include: {
-                User: {
-                  select: {
-                    id: true,
-                    email: true,
-                    name: true,
-                  },
-                },
+              where: {
+                userId: parseInt(userId),
+              },
+              select: {
+                id: true,
+                userId: true,
+                createdAt: true,
               },
             },
-            PostImage: true,
           },
           orderBy: {
             createdAt: "desc",
@@ -236,6 +238,7 @@ routerPost.get(
           skip: skip,
           take: limitNumber,
         }),
+
         prisma.post.count({
           where: {
             userId: parseInt(userId),
@@ -243,15 +246,32 @@ routerPost.get(
         }),
       ]);
 
-      const postsWithLikeCount = posts.map((post) => ({
-        ...post,
-        likeCount: post.Like.length,
-      }));
+      const postsWithLikeInfo = await Promise.all(
+        posts.map(async (post) => {
+          const totalLikes = await prisma.like.count({
+            where: {
+              postId: post.id,
+            },
+          });
+
+          const userLiked = post.Like.length > 0;
+
+          return {
+            ...post,
+            createdAt: moment(post.createdAt)
+              .locale("es")
+              .format("DD[,] MMM [del] YYYY"),
+            likeCount: totalLikes,
+            userHasLiked: userLiked,
+            userLike: userLiked ? post.Like[0] : null,
+          };
+        })
+      );
 
       return res.status(200).json(
         formatResponse(
           {
-            posts: postsWithLikeCount,
+            posts: postsWithLikeInfo,
             pagination: {
               totalPosts,
               totalPages: Math.ceil(totalPosts / limitNumber),

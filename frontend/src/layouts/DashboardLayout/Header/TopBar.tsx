@@ -138,9 +138,7 @@ export default function TopBar() {
     >
       <MenuItem>
         <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="error">
-            {/* <MailIcon /> */}
-          </Badge>
+          <Badge badgeContent={4} color="error"></Badge>
         </IconButton>
         <p>Messages</p>
       </MenuItem>
@@ -150,9 +148,7 @@ export default function TopBar() {
           aria-label="show 17 new notifications"
           color="inherit"
         >
-          <Badge badgeContent={17} color="error">
-            {/* <NotificationsIcon /> */}
-          </Badge>
+          <Badge badgeContent={17} color="error"></Badge>
         </IconButton>
         <p>Notifications</p>
       </MenuItem>
@@ -163,9 +159,7 @@ export default function TopBar() {
           aria-controls="primary-search-account-menu"
           aria-haspopup="true"
           color="inherit"
-        >
-          {/* <AccountCircle /> */}
-        </IconButton>
+        ></IconButton>
         <p>Profile</p>
       </MenuItem>
     </Menu>
@@ -201,8 +195,6 @@ export default function TopBar() {
               />
             </Search>
           </Box>
-
-          {/* <Box sx={{ flexGrow: 1 }} /> */}
 
           <Box sx={{ display: { xs: "none", md: "flex", gap: "1em" } }}>
             <HeaderTabs />

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -9,40 +10,19 @@ import {
   Avatar,
   Paper,
   Skeleton,
+  Alert,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
-import { ChevronRight, EyeOff, Info } from "lucide-react";
-import { type Theme } from "@mui/material/styles";
-
-/* ---------- Types ---------- */
-
-interface FeedSuggestion {
-  id: number;
-  name: string;
-  subtitle: string;
-  avatar: string;
-}
-
-const useStyles = makeStyles<Theme>((theme: Theme) => ({
-  card: {
-    border: `1px solid ${theme?.palette?.divider}`,
-    borderRadius: 8,
-    backgroundColor: theme?.palette?.background?.paper,
-    boxShadow: "0px 0px 5px 0px rgba(0,0,0,0.35)",
-    transition: "box-shadow 0.2s ease",
-    "&:hover": {
-      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-    },
-  },
-}));
+import { ChevronRight, Info } from "lucide-react";
+import { useUser } from "../../../context/userContext";
+import { useNavigate } from "react-router-dom";
 
 export default function CardEventFeed() {
+  const { getUserList } = useUser();
+
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simular carga de datos por 1 segundo
   useEffect(() => {
     const loadData = async () => {
-      // Simular demora de 1 segundo
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setIsLoading(false);
     };
@@ -50,10 +30,14 @@ export default function CardEventFeed() {
     loadData();
   }, []);
 
+  useEffect(() => {
+    getUserList();
+  }, []);
+
   return (
-    <Stack spacing={2} component={Paper} sx={{ borderRadius: 3 }}>
+    <Stack spacing={2} sx={{ borderRadius: 3 }}>
       <DailyGameCard isLoading={isLoading} />
-      <AddToFeedCard isLoading={isLoading} />
+      <AddToFeedCard />
     </Stack>
   );
 }
@@ -99,15 +83,11 @@ const ButtonSkeleton = () => (
   />
 );
 
-/* ---------- Daily Game ---------- */
-
 interface DailyGameCardProps {
   isLoading: boolean;
 }
 
 function DailyGameCard({ isLoading }: DailyGameCardProps) {
-  const classes = useStyles();
-
   return (
     <Card
       sx={{
@@ -115,16 +95,14 @@ function DailyGameCard({ isLoading }: DailyGameCardProps) {
         p: 2,
         minHeight: 120,
       }}
-      className={classes.card}
     >
-      {/* Título */}
       {isLoading ? (
         <Skeleton
           variant="text"
           width="60%"
           height={28}
           animation="wave"
-          sx={{ mb: 2, bgcolor: "grey.200" }}
+          sx={{ mb: 2 }}
         />
       ) : (
         <Typography fontWeight={600} mb={1}>
@@ -133,7 +111,6 @@ function DailyGameCard({ isLoading }: DailyGameCardProps) {
       )}
 
       <Stack direction="row" spacing={2} alignItems="center">
-        {/* Avatar */}
         {isLoading ? (
           <AvatarSkeleton />
         ) : (
@@ -145,13 +122,13 @@ function DailyGameCard({ isLoading }: DailyGameCardProps) {
               bgcolor: "#3b82f6",
               fontWeight: 600,
             }}
+            src={`https://i.pravatar.cc/302`}
           >
             Z
           </Avatar>
         )}
 
         <Box flex={1}>
-          {/* Contenido del juego */}
           {isLoading ? (
             <>
               <TextSkeleton width="90%" lines={1} />
@@ -170,24 +147,16 @@ function DailyGameCard({ isLoading }: DailyGameCardProps) {
           ) : (
             <>
               <Typography fontSize={14} fontWeight={600}>
-                Zip: un juego para darle al coco
+                Un juego para darle al coco
               </Typography>
 
               <Typography fontSize={13} color="text.secondary">
                 ¡Resuélvelo en 60 segundos o menos!
               </Typography>
-
-              <Stack direction="row" spacing={1} mt={0.5} alignItems="center">
-                <EyeOff size={14} color="text.secondary" />
-                <Typography fontSize={12} color="text.secondary">
-                  Solo tú podrás ver la puntuación
-                </Typography>
-              </Stack>
             </>
           )}
         </Box>
 
-        {/* Chevron */}
         {isLoading ? (
           <Skeleton
             variant="circular"
@@ -204,33 +173,14 @@ function DailyGameCard({ isLoading }: DailyGameCardProps) {
   );
 }
 
-/* ---------- Add To Feed ---------- */
+function AddToFeedCard() {
+  const navigate = useNavigate();
 
-interface AddToFeedCardProps {
-  isLoading: boolean;
-}
-
-function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
-  const suggestions: FeedSuggestion[] = [
-    {
-      id: 1,
-      name: "Tatiana Muñoz Ballesteros",
-      subtitle: "Jefe de selección",
-      avatar: "/tatiana.jpg",
-    },
-    {
-      id: 2,
-      name: "CINTE Colombia",
-      subtitle: "Empresa · Servicios y consultoría de TI",
-      avatar: "/cinte.png",
-    },
-    {
-      id: 3,
-      name: "Nequi",
-      subtitle: "Empresa · Servicios financieros",
-      avatar: "/nequi.png",
-    },
-  ];
+  const {
+    data: { user },
+    isLoading,
+    error,
+  } = useUser();
 
   return (
     <Card
@@ -240,7 +190,6 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
         minHeight: 380,
       }}
     >
-      {/* Header */}
       {isLoading ? (
         <Stack
           direction="row"
@@ -275,11 +224,9 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
         </Stack>
       )}
 
-      {/* Suggestions */}
       <Stack spacing={2}>
         {isLoading
-          ? // Skeletons para las sugerencias
-            Array.from({ length: 3 }).map((_, index) => (
+          ? Array.from({ length: 3 }).map((_, index) => (
               <Stack key={index} direction="row" spacing={2}>
                 <AvatarSkeleton />
 
@@ -290,8 +237,9 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
                 </Box>
               </Stack>
             ))
-          : // Contenido real
-            suggestions.map((item) => (
+          : !isLoading &&
+            !error?.message &&
+            user.map((item) => (
               <Stack key={item.id} direction="row" spacing={2}>
                 <Avatar
                   sx={{
@@ -301,6 +249,7 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
                     bgcolor: "#3b82f6",
                     fontWeight: 600,
                   }}
+                  src={`https://i.pravatar.cc/30${item.id}`}
                 >
                   {item.name.charAt(0)}
                 </Avatar>
@@ -310,7 +259,7 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
                     {item.name}
                   </Typography>
                   <Typography fontSize={12} color="text.secondary">
-                    {item.subtitle}
+                    @{item.alias}
                   </Typography>
 
                   <Button
@@ -327,8 +276,9 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
                         borderColor: "#3b82f6",
                       },
                     }}
+                    onClick={() => navigate(`/app/network/profile/${item.id}`)}
                   >
-                    + Seguir
+                    Perfil
                   </Button>
                 </Box>
               </Stack>
@@ -337,7 +287,6 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
 
       <Divider sx={{ my: 2 }} />
 
-      {/* Ver todas las recomendaciones */}
       {isLoading ? (
         <Skeleton
           variant="text"
@@ -366,10 +315,23 @@ function AddToFeedCard({ isLoading }: AddToFeedCardProps) {
               color: "#1d4ed8",
             },
           }}
+          onClick={() => navigate(`/app/network`)}
         >
           Ver todas las recomendaciones
           <ChevronRight size={16} />
         </Typography>
+      )}
+
+      {!isLoading && error?.message && (
+        <Box
+          component={Paper}
+          display="flex"
+          justifyContent="center"
+          p={3}
+          mt={2}
+        >
+          <Alert severity="error">{error.message}</Alert>
+        </Box>
       )}
     </Card>
   );

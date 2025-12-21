@@ -11,7 +11,9 @@ import {
   Divider,
   IconButton,
   Stack,
+  TextareaAutosize,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { Calendar, Clock, Image, Plus, Settings, Smile, X } from "lucide-react";
 import { usePost } from "../../../../context/postContext";
@@ -33,6 +35,8 @@ export default function CreatePostDialog({
   open,
   onClose,
 }: CreatePostDialogProps) {
+  const theme = useTheme();
+
   const { CreatePostUser, isLoadingForm, errorForm } = usePost();
 
   const { user } = useAuth();
@@ -85,10 +89,10 @@ export default function CreatePostDialog({
           p={2}
         >
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar src="/react-avatar.png" />
+            <Avatar src={`https://i.pravatar.cc/300?img=${user?.id}`} />
 
             <Box>
-              <Typography fontWeight={600}>Alfredo Domínguez</Typography>
+              <Typography fontWeight={600}>{user?.name}</Typography>
 
               <Typography fontSize={13} color="text.secondary">
                 Publicar para Cualquiera
@@ -106,7 +110,7 @@ export default function CreatePostDialog({
         </Stack>
 
         <Box px={2} pb={1}>
-          <textarea
+          <TextareaAutosize
             {...register("content")}
             placeholder="¿Sobre qué quieres hablar?"
             style={{
@@ -116,7 +120,7 @@ export default function CreatePostDialog({
               border: "none",
               outline: "none",
               resize: "none",
-              color: "#e5e7eb",
+              color: theme.palette.text.primary,
               fontSize: 16,
               fontFamily: "inherit",
             }}
@@ -158,7 +162,6 @@ export default function CreatePostDialog({
             px={2}
             py={1.5}
           >
-            {/* Left icons */}
             <Stack direction="row" spacing={1}>
               <IconButton sx={{ color: "text.secondary" }}>
                 <Image />

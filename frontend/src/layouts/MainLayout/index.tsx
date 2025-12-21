@@ -2,8 +2,6 @@ import { Outlet } from "react-router-dom";
 import { type Theme } from "@mui/material/styles";
 import { Typography, Grid, Box } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-// import authBackgroundLight from "../../assets/static/images/auth-background-light.png";
-// import authBackgroundDark from "../../assets/static/images/auth-background-dark-2.png";
 import backgroundImage from "../../assets/static/images/imstagran_banner.png";
 
 const useStyles = makeStyles<Theme>((theme: Theme) => ({
@@ -11,7 +9,7 @@ const useStyles = makeStyles<Theme>((theme: Theme) => ({
     height: "100%",
     padding: theme.spacing && theme.spacing(3, 2, 1),
     background: theme.palette?.background.default,
-    // backgroundImage: `url(${backgroundImage})`,
+
     backgroundRepeat: "repeat",
   },
   mainContent: {
@@ -47,10 +45,6 @@ const useStyles = makeStyles<Theme>((theme: Theme) => ({
     },
   },
   image: {
-    // backgroundImage:
-    //   theme.palette.mode === "light"
-    //     ? `url(${authBackgroundLight})`
-    //     : `url(${authBackgroundDark})`,
     width: "50%",
     height: "auto",
     backgroundRepeat: "no-repeat",
@@ -104,7 +98,14 @@ const MainLayout = () => {
             </Typography>
 
             <Typography
-              sx={{ fontWeight: "bold", fontSize: 38, textAlign: "center" }}
+              sx={{
+                fontWeight: "bold",
+                fontSize: 38,
+                textAlign: "center",
+                background: "linear-gradient(90deg, #E1306C, #F77737, #833AB4)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
               color="textPrimary"
             >
               mejores amigos.

@@ -8,7 +8,6 @@ import { fileURLToPath } from "url";
 import swaggerUi from "swagger-ui-express";
 import swaggerOptions from "./docs/index.js";
 import router from "./router/index.js";
-import { prisma } from "./database/db.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -32,20 +31,5 @@ app.get("/heart_check", (req, res) => {
 app.use("/api/v1", router);
 
 app.use("/", swaggerUi.serve, swaggerUi.setup(swaggerOptions));
-
-async function main() {
-  const allUsers = await prisma.user.findMany();
-  console.log("All users:", JSON.stringify(allUsers, null, 2));
-}
-
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
-    console.error(e);
-    await prisma.$disconnect();
-    process.exit(1);
-  });
 
 export default app;

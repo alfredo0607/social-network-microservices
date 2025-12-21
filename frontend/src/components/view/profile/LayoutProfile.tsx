@@ -6,8 +6,11 @@ import {
   Divider,
   Typography,
 } from "@mui/material";
+import { useUser } from "../../../context/userContext";
 
 export default function LayoutProfile() {
+  const { detailUser } = useUser();
+
   return (
     <>
       <Box>
@@ -28,7 +31,7 @@ export default function LayoutProfile() {
                 cursor: "pointer",
               }}
             >
-              www.linkedin.com/in/alfredo-domínguez-b2163b1a2
+              www.linkedin.com/in/{detailUser?.name}-b2163b1a2
             </Typography>
           </CardContent>
         </Card>
@@ -78,7 +81,7 @@ export default function LayoutProfile() {
               </Box>
             </Box>
             <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
-              Alfredo, explora oportunidades relevantes con Lean Tech
+              {detailUser?.name}, explora oportunidades relevantes con Lean Tech
             </Typography>
             <Typography sx={{ color: "#b8b8b8", fontSize: "0.875rem", mb: 2 }}>
               Obtén notificaciones de anuncios de empleo y noticias del sector
