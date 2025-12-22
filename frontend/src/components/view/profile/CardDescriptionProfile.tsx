@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Box, Button, Typography } from "@mui/material";
+import { Alert, Box, Button, Paper, Typography } from "@mui/material";
 import { AtSign } from "lucide-react";
 import { useEffect } from "react";
 import { useUser } from "../../../context/userContext";
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function CardDescriptionProfile({ userID }: Props) {
-  const { getUserById, detailUser } = useUser();
+  const { getUserById, detailUser, error, isLoading } = useUser();
 
   useEffect(() => {
     getUserById(userID);
@@ -17,40 +17,56 @@ export default function CardDescriptionProfile({ userID }: Props) {
 
   return (
     <>
-      <Box sx={{ flex: 1, ml: 4, mt:4 }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: "bold" }}>
-            {detailUser?.name}
-          </Typography>
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<AtSign size={16} />}
-            sx={{
-              color: "#58a6ff",
-              borderColor: "#58a6ff",
-              textTransform: "none",
-              borderRadius: 5,
-            }}
+      <Box sx={{ flex: 1, ml: 4, mt: 4 }}>
+        {!isLoading && error?.message && (
+          <Box
+            component={Paper}
+            display="flex"
+            justifyContent="center"
+            p={3}
+            mt={2}
           >
-            {detailUser?.alias}
-          </Button>
-        </Box>
+            <Alert severity="error">{error.message}</Alert>
+          </Box>
+        )}
 
-        <Typography sx={{ mb: 2 }}>{detailUser?.email}</Typography>
+        {!isLoading && !error?.message && (
+          <>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <Typography variant="h4" sx={{ fontWeight: "bold" }}>
+                {detailUser?.name}
+              </Typography>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<AtSign size={16} />}
+                sx={{
+                  color: "#58a6ff",
+                  borderColor: "#58a6ff",
+                  textTransform: "none",
+                  borderRadius: 5,
+                }}
+              >
+                {detailUser?.alias}
+              </Button>
+            </Box>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-          <Typography>
-            Cuenta creada el : {detailUser?.createdAt}{" "}
-            <span style={{ color: "#58a6ff", cursor: "pointer" }}>
-              Información de contacto
-            </span>
-          </Typography>
-        </Box>
+            <Typography sx={{ mb: 2 }}>{detailUser?.email}</Typography>
 
-        <Typography sx={{ color: "#58a6ff", mb: 2, cursor: "pointer" }}>
-          {detailUser?.age} años
-        </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              <Typography>
+                Cuenta creada el : {detailUser?.createdAt}{" "}
+                <span style={{ color: "#58a6ff", cursor: "pointer" }}>
+                  Información de contacto
+                </span>
+              </Typography>
+            </Box>
+
+            <Typography sx={{ color: "#58a6ff", mb: 2, cursor: "pointer" }}>
+              {detailUser?.age} años
+            </Typography>
+          </>
+        )}
       </Box>
     </>
   );

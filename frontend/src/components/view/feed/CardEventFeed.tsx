@@ -287,6 +287,18 @@ function AddToFeedCard() {
 
       <Divider sx={{ my: 2 }} />
 
+      {!isLoading && error?.message && (
+        <Box
+          component={Paper}
+          display="flex"
+          justifyContent="center"
+          p={3}
+          mt={2}
+        >
+          <Alert severity="error">{error.message}</Alert>
+        </Box>
+      )}
+
       {isLoading ? (
         <Skeleton
           variant="text"
@@ -320,18 +332,6 @@ function AddToFeedCard() {
           Ver todas las recomendaciones
           <ChevronRight size={16} />
         </Typography>
-      )}
-
-      {!isLoading && error?.message && (
-        <Box
-          component={Paper}
-          display="flex"
-          justifyContent="center"
-          p={3}
-          mt={2}
-        >
-          <Alert severity="error">{error.message}</Alert>
-        </Box>
       )}
     </Card>
   );

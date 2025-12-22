@@ -157,6 +157,11 @@ export default function CardPost({
                 showAlert(res.message, "success");
                 updateHasLikeUser(id, status);
                 updateHasLikeUserMtpost(id, status);
+              } else {
+                showAlert(
+                  "Hubo un error, por favor inténtalo mas tarde.",
+                  "error"
+                );
               }
             }}
             disabled={loadingLike}
