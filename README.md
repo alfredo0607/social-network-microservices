@@ -141,13 +141,3 @@ Desarrollar una aplicación full stack que permita:
 Este proyecto demuestra la implementación de una solución **Full Stack moderna**, aplicando conceptos de **microservicios**, **contenedores**, **autenticación segura** y **desarrollo frontend con React**, cumpliendo los requerimientos planteados en la prueba técnica.
 
 ---
-
-Si quieres, en el próximo mensaje puedo:
-
-- 📥 Generarte esto como **README descargable**
-- 📄 Convertirlo en **PDF**
-- ✍️ Ajustarlo con el **nombre de la empresa**
-- 🎥 Agregar una sección para el **video demostrativo**
-- 🇺🇸 Traducirlo a inglés
-
-Dime qué formato necesitas y te lo dejo listo 💪
