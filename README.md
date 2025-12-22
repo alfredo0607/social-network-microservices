@@ -1,10 +1,3 @@
-Perfecto 👍
-Te dejo un **README de la prueba técnica**, bien presentado, profesional y con **tus datos como autor**, listo para usar en el **README principal del repositorio** o como README específico de la prueba.
-
-Puedes copiar y pegar tal cual 👇
-
----
-
 # 🧪 Prueba Técnica – Desarrollador Full Stack
 
 ## Red Social con Microservicios
