@@ -1,5 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Alert, Box, Button, Paper, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { AtSign } from "lucide-react";
 import { useEffect } from "react";
 import { useUser } from "../../../context/userContext";
@@ -17,7 +24,23 @@ export default function CardDescriptionProfile({ userID }: Props) {
 
   return (
     <>
-      <Box sx={{ flex: 1, ml: 4, mt: 4 }}>
+      <Box
+        sx={(t) => ({
+          flex: 1,
+          p: 2,
+          borderRadius: 3,
+          border: 1,
+          borderColor: t.palette.divider,
+        })}
+        component={Paper}
+        elevation={0}
+      >
+        {isLoading && (
+          <Box display="flex" justifyContent="center" p={4} mt={2}>
+            <CircularProgress />
+          </Box>
+        )}
+
         {!isLoading && error?.message && (
           <Box
             component={Paper}

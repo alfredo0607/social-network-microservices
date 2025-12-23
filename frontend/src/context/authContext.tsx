@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     token: null,
     isAuthenticated: false,
     isLoading: false,
-    checkingSession: false,
+    checkingSession: true,
     mode: "light",
     error: { type: "", message: "" },
   });
@@ -206,7 +206,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
-    relogin();
+    // relogin();
 
     const thema = localStorage.getItem("theme_app") ?? "light";
 

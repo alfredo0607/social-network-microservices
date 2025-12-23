@@ -16,6 +16,7 @@ import {
 import { SquareUserRound, X } from "lucide-react";
 import { useLike } from "../../../../context/likeContext";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   status: boolean;
@@ -28,6 +29,8 @@ export default function ListUserLikePostDialog({
   onClose,
   postID,
 }: Props) {
+  const navigate = useNavigate();
+
   const {
     data: { likePost, total },
     isLoading,
@@ -88,13 +91,17 @@ export default function ListUserLikePostDialog({
               <Card sx={{ m: 2 }}>
                 <CardHeader
                   title={x.name}
-                  subheader={x.createdAt}
+                  subheader={x.likedAt}
                   avatar={
                     <Avatar src={`https://i.pravatar.cc/300?img=${x?.id}`} />
                   }
                   action={
                     <Tooltip title="Ir al perfil del usuario">
-                      <IconButton>
+                      <IconButton
+                        onClick={() =>
+                          navigate(`/app/network/profile/${x?.id}`)
+                        }
+                      >
                         <SquareUserRound />
                       </IconButton>
                     </Tooltip>

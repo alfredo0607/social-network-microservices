@@ -178,7 +178,7 @@ routeLike.get(
         ...like.User,
         likedAt: moment(like.createdAt)
           .locale("es")
-          .format("DD[,] MMM [del] YYYY"),
+          .format("DD[,] MMM [del] YYYY [a las] HH:mm:ss"),
       }));
 
       return res.status(200).json(

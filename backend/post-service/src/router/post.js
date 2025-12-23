@@ -130,7 +130,7 @@ routerPost.get(
             ...post,
             createdAt: moment(post.createdAt)
               .locale("es")
-              .format("DD[,] MMM [del] YYYY"),
+              .format("DD[,] MMM [del] YYYY [a las] HH:mm:ss"),
             likeCount: totalLikes,
             userHasLiked: userLiked,
             userLike: userLiked ? post.Like[0] : null,
@@ -260,7 +260,7 @@ routerPost.get(
             ...post,
             createdAt: moment(post.createdAt)
               .locale("es")
-              .format("DD[,] MMM [del] YYYY"),
+              .format("DD[,] MMM [del] YYYY [a las] HH:mm:ss"),
             likeCount: totalLikes,
             userHasLiked: userLiked,
             userLike: userLiked ? post.Like[0] : null,
@@ -402,7 +402,7 @@ routerPost.post(
         ...newPost,
         createdAt: moment(newPost.createdAt)
           .locale("es")
-          .format("DD[,] MMM [del] YYYY"),
+          .format("DD[,] MMM [del] YYYY [a las] HH:mm:ss"),
         likeCount: newPost.Like.length,
       };
 

@@ -6,6 +6,8 @@ services:
       POSTGRES_DB: socialdb
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
+      TZ: America/Bogota
+      PGTZ: America/Bogota
     ports:
       - "5432:5432"
     volumes:
@@ -23,6 +25,8 @@ services:
       - "3001:3001"
     env_file:
       - ./auth-service/.env
+    environment:
+      - TZ=America/Bogota
     volumes:
       - ./auth-service:/app
     working_dir: /app
@@ -38,6 +42,8 @@ services:
       - "3002:3002"
     env_file:
       - ./like-service/.env
+    environment:
+      - TZ=America/Bogota
     volumes:
       - ./like-service:/app
     working_dir: /app
@@ -53,6 +59,8 @@ services:
       - "3003:3003"
     env_file:
       - ./post-service/.env
+    environment:
+      - TZ=America/Bogota
     volumes:
       - ./post-service:/app
     working_dir: /app
@@ -68,6 +76,8 @@ services:
       - "3004:3004"
     env_file:
       - ./user-service/.env
+    environment:
+      - TZ=America/Bogota
     volumes:
       - ./user-service:/app
     working_dir: /app

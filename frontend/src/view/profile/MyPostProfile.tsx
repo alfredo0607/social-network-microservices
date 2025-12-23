@@ -27,7 +27,7 @@ export default function MyPostProfile({ userID }: Props) {
 
   useEffect(() => {
     getPostListById(userID, 1);
-  }, []);
+  }, [userID]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -55,7 +55,14 @@ export default function MyPostProfile({ userID }: Props) {
   }, [loadMorePosts]);
 
   return (
-    <>
+    <Paper
+      sx={(t) => ({
+        p: 2,
+        borderRadius: 3,
+        border: 1,
+        borderColor: t.palette.divider,
+      })}
+    >
       <Typography variant="h5" fontWeight={"bold"}>
         Mis publicaciones
       </Typography>
@@ -122,6 +129,6 @@ export default function MyPostProfile({ userID }: Props) {
           <Alert severity="info">No hay más publicaciones</Alert>
         </Box>
       )}
-    </>
+    </Paper>
   );
 }

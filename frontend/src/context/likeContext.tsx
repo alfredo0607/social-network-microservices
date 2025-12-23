@@ -9,7 +9,7 @@ import {
 
 interface Like {
   id: number;
-  createdAt: string;
+  likedAt: string;
   name: string;
 }
 
